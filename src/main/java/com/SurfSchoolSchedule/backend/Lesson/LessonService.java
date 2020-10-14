@@ -11,7 +11,7 @@ public interface LessonService <T> {
 
     Lesson addNewLesson (Pageable pageable, Lesson newLesson);
 
-
+    public Lesson getLesson (long id);
 
     void deleteLesson(long lessonId);
 

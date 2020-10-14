@@ -28,6 +28,12 @@ public class LessonServiceImpl implements LessonService<Lesson> {
 
     @Transactional
     @Override
+    public Lesson getLesson(long id) {
+        return lessonRepository.findById(id).get();
+    }
+
+    @Transactional
+    @Override
     public Lesson addNewLesson(Pageable pageable, Lesson newLesson) {
         if (lessonCanHappen(pageable, newLesson))
             return lessonRepository.save(newLesson);

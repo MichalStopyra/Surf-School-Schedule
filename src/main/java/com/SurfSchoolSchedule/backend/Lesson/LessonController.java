@@ -36,6 +36,15 @@ public class LessonController {
                 , HttpStatus.OK);
     }
 
+    @GetMapping("/{id}")
+    public Lesson getLessonsById(@PathVariable("id") long id) {
+        Lesson lesson = lessonService.getLesson(id);
+        if (lesson == null) {
+            throw new RuntimeException("No lesson with id = " + id);
+        }
+        return lesson;
+    }
+
     @RequestMapping(value = "/list", method = RequestMethod.POST)
     public ResponseEntity<Lesson> addNewLesson(@RequestBody Lesson lessonObj, Pageable pageable) {
         return new ResponseEntity<>(lessonService.addNewLesson(pageable, lessonObj), HttpStatus.CREATED);

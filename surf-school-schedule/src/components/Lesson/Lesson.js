@@ -22,7 +22,7 @@ class Lesson extends React.Component {
     }
 
     initialState = {
-        id: '', date: 'Select Date', time: 'Select Time', nrStudents: 'Select Nr of Students', status: 0, howLong: 'Select How Long',
+        id: '', date: 'Select Date', time: 'Select Hour', nrStudents: 'Select Nr of Students', status: 0, howLong: 'Select How Long',
         students: [], instructors: [], dates: [], times: [], nrStudTable: [], howLongTable: [],
         instructor: {
             id: '', lastName: 'Select Instructor', firstName: '', NrHoursWeek: 0, NrHoursFull: 0, WeekWage: 0
@@ -34,25 +34,21 @@ class Lesson extends React.Component {
 
     componentDidMount() {
         const idLesson = +this.props.match.params.id;
+
         if (idLesson) {
             this.findLessonById(idLesson);
-            this.state.students.push(this.state.student);
-            this.state.instructors.push(this.state.instructor);
-            this.state.dates.push(this.state.date);
-            this.state.times.push(this.state.time);
-            this.state.howLongTable.push(this.state.howLong);
-            this.state.nrStudTable.push(this.state.nrStudents);
         }
         this.findAllStudents();
         this.findAllInstructors();
         this.setArrays();
 
         if (idLesson) {
-            this.setState({
-                students: [new Set (this.state.students)]
-            });
+            console.log(this.state.instructors[0]);
+            console.log(this.state.dates[0]);
+
         }
     };
+
 
     arrayWithHours() {
         var arr = [], i, j;
@@ -112,10 +108,15 @@ class Lesson extends React.Component {
             .then(response => response.data)
             .then((data) => {
                 if (!this.state.students.length)
-                    this.state.students.push(this.state.student);
+                    this.state.students.push(this.initialState.student);
                 this.setState({
                     students: this.state.students.concat(data.content)
                 });
+
+                if (this.state.id)
+                    this.setState({
+                        students: this.state.students.filter(student => student.id !== this.state.students[0].id)
+                    });
             });
     };
 
@@ -127,9 +128,17 @@ class Lesson extends React.Component {
             .then((data) => {
                 if (!this.state.instructors.length)
                     this.state.instructors.push(this.state.instructor);
+                // this.state.instructors.push("Select Instructor");
+
                 this.setState({
                     instructors: this.state.instructors.concat(data.content)
                 });
+
+                if (this.state.id)
+                    this.setState({
+                        instructors: this.state.instructors.filter(instructor => instructor.id !== this.state.instructors[0].id)
+                    });
+
             });
 
     };
@@ -210,16 +219,23 @@ class Lesson extends React.Component {
         if (!this.isValid()) {
             return;
         }
+        if (typeof (this.state.instructor) === "object")
+            this.state.instructor = JSON.stringify(this.state.instructor);
+
+        if (typeof (this.state.student) === "object")
+            this.state.student = JSON.stringify(this.state.student);
+
         const lesson = {
             id: this.state.id,
-            instructor: this.state.instructor,
-            student: this.state.student,
+            instructor: JSON.parse(this.state.instructor),
+            student: JSON.parse(this.state.student),
             date: this.state.date,
             time: this.state.time,
             howLong: this.state.howLong,
             nrStudents: this.state.nrStudents,
             status: this.state.status
         };
+
         axios.put("http://localhost:8080/lesson-api/" + this.state.id, lesson)
             .then(response => {
                 if (response.data != null) {
@@ -287,12 +303,13 @@ class Lesson extends React.Component {
                                         value={instructor}
                                         onChange={this.lessonChange}
                                         className={"bg-dark text-white"} >
-                                        {this.state.instructors.map(instructor =>
-                                            <option key={instructor.id} value={JSON.stringify(instructor)}>
-                                                {instructor.lastName + " " + instructor.firstName}
+                                        {this.state.instructors.filter((item, index) => this.state.instructors.indexOf(item) === index)
+                                            .map(instructor =>
+                                                <option key={instructor.id} value={JSON.stringify(instructor)}>
+                                                    {instructor.lastName + " " + instructor.firstName}
 
-                                            </option>
-                                        )}
+                                                </option>
+                                            )}
                                     </Form.Control>
                                 </Form.Group>
                             </Form.Row>
