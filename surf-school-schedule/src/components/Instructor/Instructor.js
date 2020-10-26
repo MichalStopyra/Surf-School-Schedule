@@ -2,9 +2,11 @@ import React from 'react';
 import { Form, Card, Col, Button } from 'react-bootstrap';
 import { faSave, faUndo, faArrowLeft, faEdit, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
 import SuccessToast from '../SuccessToast';
+
+
+import { connect } from 'react-redux';
+import { saveInstructor, fetchInstructor, updateInstructor } from '../../services/index';
 
 class Instructor extends React.Component {
 
@@ -12,6 +14,7 @@ class Instructor extends React.Component {
         super(props);
         this.state = this.initialState;
         this.state.show = false;
+        this.state.showInvalidMessage = false;
         this.state.method = 'post';
         this.instructorChange = this.instructorChange.bind(this);
         this.submitInstructor = this.submitInstructor.bind(this);
@@ -30,23 +33,22 @@ class Instructor extends React.Component {
 
 
     findInstructorById = (idInstructor) => {
-        axios.get("http://localhost:8080/instructor-api/" + idInstructor)
-            .then(response => {
-                if (response.data != null) {
-                    this.setState({
-                        id: response.data.id,
-                        lastName: response.data.lastName,
-                        firstName: response.data.firstName,
-                        NrHoursWeek: response.data.NrHoursWeek,
-                        NrHoursFull: response.data.NrHoursFull,
-                        WeekWage: response.data.WeekWage,
-                    });
-                    console.log(response.data.lastName);
 
-                }
-            }).catch((error) => {
-                console.error("Error: " + error);
-            });
+        this.props.fetchInstructor(idInstructor);
+        setTimeout(() => {
+
+            let instructor = this.props.instructor.instructor;
+            if (instructor != null) {
+                this.setState({
+                    id: instructor.id,
+                    lastName: instructor.lastName,
+                    firstName: instructor.firstName,
+                    NrHoursWeek: instructor.NrHoursWeek,
+                    NrHoursFull: instructor.NrHoursFull,
+                    WeekWage: instructor.WeekWage
+                });
+            }
+        }, 1000);
     };
 
     returnToList = () => {
@@ -64,18 +66,17 @@ class Instructor extends React.Component {
             WeekWage: this.state.WeekWage,
         };
 
-        console.log(instructor);
-        axios.post("http://localhost:8080/instructor-api/list", instructor)
-            .then(response => {
-                if (response.data != null) {
-                    this.setState({ "show": true, "method": "post" });
-                    setTimeout(() => this.setState({ "show": false }), 3000);
-                    setTimeout(() => this.returnToList(), 1000);
-                } else {
-                    this.setState({ "show": false });
-                }
-            });
-
+        this.props.saveInstructor(instructor);
+        setTimeout(() => {
+            if (this.props.instructor) {
+                this.setState({ "show": true, "method": "post" });
+                setTimeout(() => this.setState({ "show": false }), 3000);
+                setTimeout(() => this.returnToList(), 1000);
+            } else {
+                this.setState({ "showInvalidMessage": true, "method": "post" });
+                setTimeout(() => this.setState({ "showInvalidMessage": false }), 3000);
+            }
+        }, 1000);
     };
 
     updateInstructor = event => {
@@ -88,43 +89,49 @@ class Instructor extends React.Component {
             NrHoursWeek: this.state.NrHoursWeek,
             NrHoursFull: this.state.NrHoursFull,
             WeekWage: this.state.WeekWage,
-        }; 
-        axios.put("http://localhost:8080/instructor-api/"+this.state.id, instructor)
-            .then(response => {
-                if (response.data != null) {
-                    this.setState({ "show": true, "method": "put" });
-                    setTimeout(() => this.setState({ "show": false }), 3000);
-                    setTimeout(() => this.returnToList(), 1000);
-                } else {
-                    this.setState({ "show": false });
-                }
-            });
-        this.setState(this.initialState);
+        };
+
+        this.props.updateInstructor(instructor);
+        setTimeout(() => {
+
+            if (!this.props.instructor.error) {
+                this.setState({ "show": true, "method": "put" });
+                setTimeout(() => this.setState({ "show": false }), 3000);
+                setTimeout(() => this.returnToList(), 1000);
+            } else {
+                this.setState({ "showInvalidMessage": true, "method": "post" });
+                setTimeout(() => this.setState({ "showInvalidMessage": false }), 3000);
+            }
+        }, 2000);
     }
 
     resetInstructor = () => {
         this.setState(() => this.initialState);
-    };
+    };//??????????????????????????????????????????????????????????
 
     instructorChange = event => {
         this.setState({
             [event.target.name]: event.target.value
         });
-    };
+    };//?????????????????????????????????????????????????
 
     render() {
-        const { firstName, lastName} = this.state;
+        const { firstName, lastName } = this.state;
+        const idInstructor = +this.props.match.params.id;
         return (
             <div>
                 <div style={{ "display": this.state.show ? "block" : "none" }}>
                     <SuccessToast show={this.state.show} message={this.state.method === "put" ? "Instructor Updated Successfully" : "Instructor Saved Successfully."} type="success" />
                 </div>
+                <div style={{ "display": this.state.showInvalidMessage ? "block" : "none" }}>
+                    <SuccessToast show={this.state.showInvalidMessage} message={"Invalid Data - might be in the data base already"} type="dangerNoSuccess" />
+                </div>
 
                 <Card className={"border border-dark bg-dark text-white"}>
                     <Card.Header>
-                        <FontAwesomeIcon icon={this.state.id ? faEdit : faPlusSquare} /> {this.state.id ? "Update Instructor" : "Add New Instructor"}
+                        <FontAwesomeIcon icon={idInstructor ? faEdit : faPlusSquare} /> {idInstructor ? "Update Instructor" : "Add New Instructor"}
                     </Card.Header>
-                    <Form onReset={this.resetInstructor} onSubmit={this.state.id ? this.updateInstructor : this.submitInstructor}>
+                    <Form onReset={this.resetInstructor} onSubmit={idInstructor ? this.updateInstructor : this.submitInstructor}>
                         <Card.Body>
                             <Form.Row>
                                 <Form.Group as={Col} controlId="formGridLastName">
@@ -157,7 +164,7 @@ class Instructor extends React.Component {
                         <Card.Footer>
                             <div>
                                 <Button size="sm" variant="primary" type="submit">
-                                    <FontAwesomeIcon icon={faSave} /> {this.state.id ? "Update" : "Submit"}
+                                    <FontAwesomeIcon icon={faSave} /> {idInstructor ? "Update" : "Submit"}
                                 </Button>
                                 {'      '}
 
@@ -181,4 +188,22 @@ class Instructor extends React.Component {
     }
 
 }
-export default Instructor;
+
+const mapStateToProps = state => {
+    return {
+        //savedInstructorObject: state.instructor,
+        //      instructorObject: state.instructor,
+        //  updatedInstructor: state.instructor.instructor
+        instructor: state.instructor
+    };
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        saveInstructor: (instructor) => dispatch(saveInstructor(instructor)),
+        fetchInstructor: (instructorId) => dispatch(fetchInstructor(instructorId)),
+        updateInstructor: (instructor) => dispatch(updateInstructor(instructor))
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Instructor);

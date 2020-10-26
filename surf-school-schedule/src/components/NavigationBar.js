@@ -12,6 +12,7 @@ export default function NavigationBar() {
                 <Link to={"/students"} className="nav-link">Students</Link>
                 <Link to={"/instructors"} className="nav-link">Instructors</Link>
                 <Link to={"/lessons"} className="nav-link">Lessons</Link>
+                <Link to={"/schedule"} className="nav-link">Schedule</Link>
 
             </Nav>
 

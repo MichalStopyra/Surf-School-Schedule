@@ -6,12 +6,16 @@ import NavigationBar from './components/NavigationBar';
 import Footer from './components/Footer';
 import Welcome from './components/Welcome';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+
+
+
 import Student from './components/Student/Student';
 import StudentList from './components/Student/StudentList';
 import Instructor from './components/Instructor/Instructor';
 import InstructorList from './components/Instructor/InstructorList';
 import Lesson from './components/Lesson/Lesson';
 import LessonList from './components/Lesson/LessonList';
+import Schedule from './components/Lesson/Schedule';
 
 
 export default function App() {
@@ -34,7 +38,6 @@ export default function App() {
               <Route path="/students" exact component={StudentList} />
               <Route path="/add-student" exact component={Student} />
               <Route path="/add-instructor" exact component={Instructor} />
-              <Route path="/instructors" exact component={InstructorList} />
               <Route path="/editStudent/:id" exact component={Student} />
               <Route path="/settleStudent/:id" exact component={Student} />
               <Route path="/editInstructor/:id" exact component={Instructor} />
@@ -42,6 +45,8 @@ export default function App() {
               <Route path="/lessons" exact component={LessonList} />
               <Route path="/add-lesson" exact component={Lesson} />
               <Route path="/editLesson/:id" exact component={Lesson} />
+              <Route path="/schedule" exact component={Schedule} />
+              <Route path="/instructors" exact component={InstructorList} />
 
             </Switch>
           </Col>

@@ -7,6 +7,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUsers, faWallet, faEdit, faTrash, faUserPlus, faStepBackward, faFastBackward, faStepForward, faFastForward, faSearch, faTimes, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
 import SuccessToast from '../SuccessToast';
 
+import { connect } from 'react-redux';
+import { deleteLesson, fetchAllLessons, searchLessons } from './../../services/index';
+
 import './../../style/Style.css';
 
 
@@ -24,45 +27,47 @@ class LessonList extends React.Component {
     }
 
     componentDidMount() {
-        this.findAllLessons(this.state.currentPage);
+        this.props.fetchAllLessons(this.props.lesson.currentPage, this.state.lessonsPerPage, this.props.lesson.sortDirection);
     }
 
-    findAllLessons(currentPage) {
-        currentPage -= 1;
-        let sortDirection = this.state.sortToggle ? "asc" : "desc";
-        axios.get("http://localhost:8080/lesson-api/list?page=" + currentPage + "&size=" + this.state.lessonsPerPage + "&sortBy=status&sortDir=" + sortDirection)
-            .then(response => response.data)
-            .then((data) => {
-                this.setState({
-                    lessons: data.content,
-                    totalPages: data.totalPages,
-                    totalElements: data.totalElements,
-                    currentPage: data.number + 1
-                });
-            });
-    }
+
+    //change status of lessons that have their date in the past and were not given into not given
+    checkIfLessonInThePast() {
+        let today = new Date();
+
+        for (let i = 0; i < this.state.lessons.length; ++i) {
+            let temp = new Date(this.state.lessons[i].date);
+            if (this.state.lessons[i].status === "To_Give" && temp < today) {
+                console.log("asd");
+                this.lessonStatusChange(this.state.lessons[i], 3)
+            }
+        }
+    };
 
     deleteLesson = (idLesson) => {
-        axios.delete("http://localhost:8080/lesson-api/list/" + idLesson)
-            .then(response => {
-                if (response.data != null) {
-                    this.setState({ "show": true });
-                    setTimeout(() => this.setState({ "show": false }), 3000);
-                    this.setState({
-                        lessons: this.state.lessons.filter(lesson => lesson.id !== idLesson)
-                    });
-                } else {
-                    this.setState({ "show": false });
-                }
-            });
-    }
+
+        this.props.deleteLesson(idLesson);
+
+        setTimeout(() => {
+            if (this.props.lesson != null) {
+                this.setState({ "show": true });
+                setTimeout(() => this.setState({ "show": false }), 1000);
+
+            } else {
+                this.setState({ "show": false });
+            }
+        }, 1000);
+        this.props.fetchAllLessons(this.props.lesson.currentPage, this.state.lessonsPerPage, this.props.lesson.sortDirection);
+
+    };
 
     changePage = event => {
         let target = parseInt(event.target.value);
-        if (this.state.searchedLesson) {
+        if (this.props.lesson.searchedLesson) {
             this.searchLesson(target)
         } else {
-            this.findAllLessons(target);
+            let sortDirection = this.state.sortToggle ? "asc" : "desc";
+            this.props.fetchAllLessons(target, this.state.lessonsPerPage, this.props.lesson.sortDirection);
         }
         this.setState({
             [event.target.name]: target
@@ -72,84 +77,87 @@ class LessonList extends React.Component {
 
     firstPage = () => {
         let firstPage = 1;
-        if (this.state.currentPage > firstPage) {
-            if (this.state.searchedLesson) {
-                this.searchLesson(firstPage)
+
+        if (this.props.lesson.currentPage > firstPage) {
+            this.props.lesson.currentPage = 1;
+            if (this.props.lesson.searchedLesson) {
+                this.searchLesson(this.props.lesson.currentPage)
             } else {
-                this.findAllLessons(firstPage);
+                let sortDirection = this.state.sortToggle ? "asc" : "desc";
+                this.props.fetchAllLessons(this.props.lesson.currentPage, this.state.lessonsPerPage, this.props.lesson.sortDirection);
             }
         }
     };
 
     prevPage = () => {
-        let prevPage = this.state.currentPage - 1;
-        if (this.state.currentPage > 1) {
-            if (this.state.searchedLesson) {
-                this.searchLesson(prevPage)
+        if (this.props.lesson.currentPage > 1) {
+            --this.props.lesson.currentPage;
+            if (this.props.lesson.searchedLesson) {
+                this.searchLesson(this.props.lesson.currentPage)
             } else {
-                this.findAllLessons(prevPage);
+                let sortDirection = this.state.sortToggle ? "asc" : "desc";
+                this.props.fetchAllLessons(this.props.lesson.currentPage, this.state.lessonsPerPage, this.props.lesson.sortDirection);
             }
         }
     };
 
     lastPage = () => {
-        // let lessonsLength = this.props.lessonData.lessons.length;
         let lessonsLength = this.state.lessons.length;
-        let lastPage = Math.ceil(this.state.totalElements / this.state.lessonsPerPage);
-        if (this.state.currentPage < lastPage) {
-            if (this.state.searchedLesson) {
-                this.searchLesson(lastPage)
+        let lastPage = Math.ceil(this.props.totalElements / this.state.lessonsPerPage);
+        if (this.props.lesson.currentPage < lastPage) {
+            this.props.lesson.currentPage = lastPage;
+            if (this.props.lesson.searchedLesson) {
+                this.searchLesson(this.props.lesson.currentPage)
             } else {
-                this.findAllLessons(lastPage);
+                this.props.fetchAllLessons(this.props.lesson.currentPage, this.state.lessonsPerPage, this.props.lesson.sortDirection);
             }
         }
     };
 
     nextPage = () => {
-        let nextPage = this.state.currentPage + 1;
-        if (this.state.currentPage < Math.ceil(this.state.totalElements / this.state.lessonsPerPage)) {
-            if (this.state.searchedLesson) {
-                this.searchLesson(nextPage)
+        if (this.state.currentPage < Math.ceil(this.props.totalElements / this.state.lessonsPerPage)) {
+            ++this.props.lesson.currentPage;
+
+            if (this.props.lesson.searchedLesson) {
+                this.searchLesson(this.props.lesson.currentPage)
             } else {
-                this.findAllLessons(nextPage);
+                let sortDirection = this.state.sortToggle ? "asc" : "desc";
+                this.props.fetchAllLessons(this.props.lesson.currentPage, this.state.lessonsPerPage, this.props.lesson.sortDirection);
             }
         }
     };
 
     searchChange = event => {
-        this.setState({
-            [event.target.name]: event.target.value
-        });
+        this.props.lesson.searchedLesson = event.target.value;
+        this.forceUpdate();
     };
 
     cancelSearch = () => {
-        this.setState({ "searchedLesson": '' })
+        this.props.lesson.searchedLesson = '';
+        this.props.fetchAllLessons(this.props.lesson.currentPage, this.state.lessonsPerPage, this.props.lesson.sortDirection);
+        this.forceUpdate();
     };
 
     sortData = () => {
-        this.setState(state => ({
-            sortToggle: !state.sortToggle
-        }));
+        // console.log(this.props.lesson.sortDirection);
+        if (this.props.lesson.sortDirection === "asc")
+            this.props.lesson.sortDirection = "desc";
+        else
+            this.props.lesson.sortDirection = "asc";
+        //   console.log(this.props.lesson.sortDirection);
 
-        this.findAllLessons(this.state.currentPage);
+        this.props.fetchAllLessons(this.props.lesson.currentPage, this.state.lessonsPerPage, this.props.lesson.sortDirection);
+
     }
 
     searchLesson = (currentPage) => {
-        currentPage -= 1;
-        axios.get("http://localhost:8080/lesson-api/search/" + this.state.searchedLesson + "?page=" + currentPage + "&size=" + this.state.lessonsPerPage)
-            .then(response => response.data)
-            .then((data) => {
-                this.setState({
-                    lessons: data.content,
-                    totalPages: data.totalPages,
-                    totalElements: data.totalElements,
-                    currentPage: data.number + 1
-                });
-            });
+        if (this.props.lesson.searchedLesson)
+            this.props.searchLessons(this.props.lesson.searchedLesson, this.props.lesson.currentPage, this.props.lesson.lessonsPerPage);
     }
 
-    lessonTookPlace = (lesson) => {
-        lesson.status = 2;
+
+    lessonStatusChange = (lesson, newStatus) => {
+        lesson.status = newStatus;
         axios.put("http://localhost:8080/lesson-api/" + lesson.id, lesson)
             .then(response => {
                 if (response.data != null) {
@@ -162,7 +170,7 @@ class LessonList extends React.Component {
                     // this.setState({ "show": false });
                 }
             });
-
+        console.log(this);
         this.findAllLessons(this.state.currentPage);
         this.findAllLessons(this.state.currentPage);
 
@@ -171,7 +179,13 @@ class LessonList extends React.Component {
 
 
     render() {
-        const { lessons, currentPage, totalPages, searchedLesson } = this.state;
+        const searchedLesson = this.props.lesson.searchedLesson;
+        const totalPages = this.props.lesson.totalPages;
+        const totalElements = this.props.lesson.totalElements;
+        const lesson = this.props.lesson;
+        const lessons = this.props.lessons;
+        const currentPage = this.props.lesson.currentPage;
+        const sortDirection = this.props.lesson.sortDirection;
 
         const pageNumCss = {
             width: "45px",
@@ -223,7 +237,7 @@ class LessonList extends React.Component {
                                 <tr>
                                     <th>Instructor</th>
                                     <th>Student</th>
-                                    <th onClick={this.sortData}> Date [mm/dd/yy] <div className={this.state.sortToggle ? "arrow arrow-down" : "arrow arrow-up"} /> </th>
+                                    <th onClick={this.sortData}> Date <div className={this.state.sortToggle ? "arrow arrow-down" : "arrow arrow-up"} /> </th>
                                     <th>Time</th>
                                     <th>How Long [h]</th>
                                     <th>Nr of Students</th>
@@ -234,12 +248,12 @@ class LessonList extends React.Component {
 
 
                             <tbody>
-                                {this.state.lessons.length === 0 ?
+                                {lessons.length === 0 ?
                                     <tr align="center">
                                         <td colSpan="10"> No Lessons in the Data Base</td>
                                     </tr> :
 
-                                    this.state.lessons.map(lesson => (
+                                    lessons.map(lesson => (
                                         <tr key={lesson.id}>
                                             <td>{lesson.instructor.firstName + " " + lesson.instructor.lastName}</td>
                                             <td>{lesson.student.firstName + " " + lesson.student.lastName}</td>
@@ -250,7 +264,7 @@ class LessonList extends React.Component {
                                             <td>{lesson.status}</td>
                                             <td>
                                                 <ButtonGroup>
-                                                    <Button size="sm" variant="outline-success" onClick={this.lessonTookPlace.bind(this, lesson)}> <FontAwesomeIcon icon={faCheckSquare} /> </Button>
+                                                    <Button size="sm" variant="outline-success" onClick={this.lessonStatusChange.bind(this, lesson, 2)}> <FontAwesomeIcon icon={faCheckSquare} /> </Button>
                                                     <Link to={"editLesson/" + lesson.id}> <Button size="sm" variant="outline-primary"> <FontAwesomeIcon icon={faEdit} /> </Button> </Link>
                                                     <Button size="sm" variant="outline-danger" onClick={this.deleteLesson.bind(this, lesson.id)}> <FontAwesomeIcon icon={faTrash} /> </Button>
                                                 </ButtonGroup>
@@ -307,4 +321,27 @@ class LessonList extends React.Component {
 
 }
 
-export default LessonList;
+const mapStateToProps = state => {
+    return {
+        lesson: state.lesson,
+        lessons: state.lesson.lessons,
+        totalPages: state.lesson.totalPages,
+        totalElements: state.lesson.totalElements,
+        currentPage: state.lesson.currentPage,
+        searchedLesson: state.lesson.searchedLesson,
+        sortDirection: state.lesson.sortDirection
+    }
+};
+
+
+const mapDispatchToProps = dispatch => {
+    return {
+        fetchAllLessons: (currentPage, size, sortDir) => dispatch(fetchAllLessons(currentPage, size, sortDir)),
+        deleteLesson: (lessonId) => dispatch(deleteLesson(lessonId)),
+        searchLessons: (searchedLesson, currentPage, sizePage) => dispatch(searchLessons(searchedLesson, currentPage, sizePage))
+    }
+
+};
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(LessonList);

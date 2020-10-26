@@ -4,8 +4,13 @@ import { faSave, faUndo, faArrowLeft, faEdit, faPlusSquare, faLanguage } from '@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import moment from 'moment';
 import SuccessToast from '../SuccessToast';
 import Instructor from '../Instructor/Instructor';
+import Student from '../Student/Student';
+
+import { connect } from 'react-redux';
+import { saveLesson, fetchLesson, updateLesson, fetchAllInstructors, fetchAllStudents } from '../../services/index';
 
 class Lesson extends React.Component {
 
@@ -23,13 +28,13 @@ class Lesson extends React.Component {
 
     initialState = {
         id: '', date: 'Select Date', time: 'Select Hour', nrStudents: 'Select Nr of Students', status: 0, howLong: 'Select How Long',
-        students: [], instructors: [], dates: [], times: [], nrStudTable: [], howLongTable: [],
-        instructor: {
-            id: '', lastName: 'Select Instructor', firstName: '', NrHoursWeek: 0, NrHoursFull: 0, WeekWage: 0
-        },
-        student: {
-            id: '', lastName: 'Select Student', firstName: '', idCardNr: '', telNr: '', paymentStatus: 0, lessonHours: 0, unpaidLessons: 0, moneyOwing: 0, moneyInAdvance: ''
-        }
+        students: [], instructors: [], dates: [], times: [], nrStudTable: [], howLongTable: []
+    //    / instructor: {
+    //         id: '', lastName: 'Select Instructor', firstName: '', NrHoursWeek: 0, NrHoursFull: 0, WeekWage: 0
+    //     },
+    //     student: {
+    //         id: '', lastName: 'Select Student', firstName: '', idCardNr: '', telNr: '', paymentStatus: 0, lessonHours: 0, unpaidLessons: 0, moneyOwing: 0, moneyInAdvance: ''
+    //     }
     }
 
     componentDidMount() {
@@ -38,15 +43,11 @@ class Lesson extends React.Component {
         if (idLesson) {
             this.findLessonById(idLesson);
         }
+
         this.findAllStudents();
         this.findAllInstructors();
+
         this.setArrays();
-
-        if (idLesson) {
-            console.log(this.state.instructors[0]);
-            console.log(this.state.dates[0]);
-
-        }
     };
 
 
@@ -67,8 +68,18 @@ class Lesson extends React.Component {
     getDateArray(start, end) {
         var arr = new Array();
         var dt = new Date(start);
-        while (dt <= end) {
-            arr.push((new Date(dt)).toLocaleDateString("en-US"));
+        while (dt < end) {
+            var dd = dt.getDate();
+            var mm = dt.getMonth() + 1;
+            var yyyy = dt.getFullYear();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            if (mm < 10) {
+                mm = '0' + mm;
+            }
+            var fullDate = mm + '-' + dd + '-' + yyyy;
+            arr.push(fullDate);
             dt.setDate(dt.getDate() + 1);
         }
         return arr;
@@ -101,46 +112,99 @@ class Lesson extends React.Component {
             howLongTable: this.state.howLongTable.concat(this.getHowLongArray()),
             nrStudTable: this.state.nrStudTable.concat(this.getNrStudArray())
         });
+        if (this.state.id) {
+            this.filterTimesArray();
+        }
     }
 
-    findAllStudents = () => {
-        axios.get("http://localhost:8080/student-api/list?page=0&size=999999999&sortBy=paymentStatus&sortDir=desc")
-            .then(response => response.data)
-            .then((data) => {
-                if (!this.state.students.length)
-                    this.state.students.push(this.initialState.student);
-                this.setState({
-                    students: this.state.students.concat(data.content)
-                });
+    //leave only free hours - when instructor does not have other lessons
+    //this doesn't check if student has other lessons
+    filterTimesArray = () => {
+        axios.get("http://localhost:8080/lesson-api/" + this.state.instructor.id + "/" + this.state.date)
+            .then(response => {
+                if (response.data != null) {
+                    //save when the lessons start 
+                    let timesTab = response.data.content;
+                    timesTab = timesTab.map(t => t.time);
 
-                if (this.state.id)
+                    //save how long they take
+                    let howLongTab = response.data.content;
+                    howLongTab = howLongTab.map(h => h.howLong);
+
+                    //if lesson is gonna e.g.  start at 12 and take 2h - delete not only 12 but also 1 pm 
+                    for (let i = 0; i < howLongTab.length; ++i) {
+                        if (howLongTab[i] > 1) {
+                            var pieces = timesTab[i].split(':');
+
+                            for (var j = 1; j < howLongTab[i]; ++j) {
+                                ++pieces[0];
+                                var tempHour = pieces[0] + ":00";
+                                timesTab = timesTab.concat(tempHour)
+                            }
+                        }
+                    }
+
+                    this.state.times = [];
+                    this.state.times.push('Select Hour');
+                    this.state.times = this.state.times.concat(this.arrayWithHours());
+
                     this.setState({
-                        students: this.state.students.filter(student => student.id !== this.state.students[0].id)
+                        times: this.state.times.filter(e => !timesTab.includes(e))
                     });
+
+
+                }
+            }).catch((error) => {
+                console.error("Error: " + error);
             });
-    };
+
+    }
+
+    // findAllStudents = () => {
+    //     axios.get("http://localhost:8080/student-api/list?page=0&size=999999999&sortBy=paymentStatus&sortDir=desc")
+    //         .then(response => response.data)
+    //         .then((data) => {
+
+    //             if (!this.state.students.length)
+    //                 this.state.students.push(this.initialState.student);
+    //             this.setState({
+    //                 students: this.state.students.concat(data.content)
+    //             });
+
+    //             if (this.state.id)
+    //                 this.setState({
+    //                     students: this.state.students.filter(student => student.id !== this.state.students[0].id)
+    //                 });
+
+    //         });
+
+    // };
+
+    findAllStudents = () => {
+        this.props.fetchAllStudents(1,999999999, "asc");
+    }
 
 
 
     findAllInstructors = () => {
-        axios.get("http://localhost:8080/instructor-api/list?page=0&size=999999999&sortBy=paymentStatus&sortDir=desc")
-            .then(response => response.data)
-            .then((data) => {
-                if (!this.state.instructors.length)
-                    this.state.instructors.push(this.state.instructor);
-                // this.state.instructors.push("Select Instructor");
+        // axios.get("http://localhost:8080/instructor-api/list?page=0&size=999999999&sortBy=paymentStatus&sortDir=desc")
+        //     .then(response => response.data)
+        //     .then((data) => {
+        //         if (!this.state.instructors.length)
+        //             this.state.instructors.push(this.state.instructor);
+        //         // this.state.instructors.push("Select Instructor");
 
-                this.setState({
-                    instructors: this.state.instructors.concat(data.content)
-                });
+        //         this.setState({
+        //             instructors: this.state.instructors.concat(data.content)
+        //         });
 
-                if (this.state.id)
-                    this.setState({
-                        instructors: this.state.instructors.filter(instructor => instructor.id !== this.state.instructors[0].id)
-                    });
+        //         if (this.state.id)
+        //             this.setState({
+        //                 instructors: this.state.instructors.filter(instructor => instructor.id !== this.state.instructors[0].id)
+        //             });
 
-            });
-
+        //     });
+        this.props.fetchAllInstructors(1,999999999, "asc");
     };
 
 
@@ -260,10 +324,26 @@ class Lesson extends React.Component {
         this.setState({
             [event.target.name]: event.target.value
         });
+
     };
 
+    lessonChangeInstructor = event => {
+        this.setState({
+            [event.target.name]: event.target.value
+        });
+        this.state.instructor = event.target.value;
+        if (typeof (this.state.instructor) === "string")
+            this.state.instructor = JSON.parse(this.state.instructor);
+
+        this.filterTimesArray();
+
+    }
+
     render() {
-        const { student, instructor, date, time, howLong, nrStudents } = this.state;
+        const { /*student, instructor,*/ date, time, howLong, nrStudents } = this.state;
+        const instructor = this.props.instructor;
+        const student = this.props.student;
+
         return (
             <div>
                 <div style={{ "display": this.state.show ? "block" : "none" }}>
@@ -301,7 +381,7 @@ class Lesson extends React.Component {
                                         autoComplete="off"
                                         name="instructor"
                                         value={instructor}
-                                        onChange={this.lessonChange}
+                                        onChange={this.lessonChangeInstructor}
                                         className={"bg-dark text-white"} >
                                         {this.state.instructors.filter((item, index) => this.state.instructors.indexOf(item) === index)
                                             .map(instructor =>
@@ -316,7 +396,7 @@ class Lesson extends React.Component {
 
                             <Form.Row>
                                 <Form.Group as={Col} controlId="formGridDate">
-                                    <Form.Label>Date [mm/dd/yyyy]</Form.Label>
+                                    <Form.Label>Date [dd-mm-yyyy]</Form.Label>
                                     <Form.Control required as="select"
                                         autoComplete="off"
                                         name="date"
@@ -412,4 +492,25 @@ class Lesson extends React.Component {
     }
 
 }
-export default Lesson;
+const mapStateToProps = state => {
+    return {
+        //savedStudentObject: state.student,
+        //      studentObject: state.student,
+        //  updatedStudent: state.student.student
+        lesson: state.lesson,
+        instructor: state.instructor,
+        student: state.student
+    };
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        fetchAllStudents: (currentPage, size, sortDir) => dispatch(fetchAllStudents(currentPage, size, sortDir)),
+        fetchAllInstructors: (currentPage, size, sortDir) => dispatch(fetchAllInstructors(currentPage, size, sortDir)),
+        saveLesson: (lesson) => dispatch(saveLesson(lesson)),
+        fetchLesson: (lessonId) => dispatch(fetchLesson(lessonId)),
+        updateLesson: (lesson) => dispatch(updateLesson(lesson))
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Lesson);

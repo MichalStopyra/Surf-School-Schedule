@@ -2,9 +2,10 @@ import React from 'react';
 import { Form, Card, Col, Button } from 'react-bootstrap';
 import { faSave, faUndo, faArrowLeft, faEdit, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
 import SuccessToast from '../SuccessToast';
+
+import { connect } from 'react-redux';
+import { saveStudent, fetchStudent, updateStudent } from '../../services/index';
 
 class Student extends React.Component {
 
@@ -29,33 +30,34 @@ class Student extends React.Component {
     };
 
 
-    findStudentById = (idStudent) => {
-        axios.get("http://localhost:8080/student-api/" + idStudent)
-            .then(response => {
-                if (response.data != null) {
-                    this.setState({
-                        id: response.data.id,
-                        lastName: response.data.lastName,
-                        firstName: response.data.firstName,
-                        idCardNr: response.data.idCardNr,
-                        telNr: response.data.telNr,
-                        paymentStatus: response.data.paymentStatus,
-                        lessonHours: response.data.lessonHours,
-                        unpaidLessons: response.data.unpaidLessons,
-                        moneyOwing: response.data.moneyOwing,
-                        moneyInAdvance: response.data.moneyInAdvance
-                    });
-                    console.log(response.data.lastName);
 
-                }
-            }).catch((error) => {
-                console.error("Error: " + error);
-            });
+    findStudentById = (idStudent) => {
+
+        this.props.fetchStudent(idStudent);
+        setTimeout(() => {
+
+            let student = this.props.student.student;
+            if (student != null) {
+                this.setState({
+                    id: student.id,
+                    lastName: student.lastName,
+                    firstName: student.firstName,
+                    idCardNr: student.idCardNr,
+                    telNr: student.telNr,
+                    paymentStatus: student.paymentStatus,
+                    lessonHours: student.lessonHours,
+                    unpaidLessons: student.unpaidLessons,
+                    moneyOwing: student.moneyOwing,
+                    moneyInAdvance: student.moneyInAdvance
+                });
+            }
+        }, 1000);
     };
 
     returnToList = () => {
         return this.props.history.push("/students");
     };
+
 
     submitStudent = event => {
         event.preventDefault();
@@ -72,18 +74,17 @@ class Student extends React.Component {
             moneyInAdvance: this.state.moneyInAdvance
         };
 
-        axios.post("http://localhost:8080/student-api/list", student)
-            .then(response => {
-                if (response.data != null) {
-                    this.setState({ "show": true, "method": "post" });
-                    setTimeout(() => this.setState({ "show": false }), 3000);
-                    setTimeout(() => this.returnToList(), 1000);
-                } else {
-                    this.setState({ "show": false });
-                }
-            });
-        this.setState(this.initialState);
-
+        this.props.saveStudent(student);
+        setTimeout(() => {
+            if (!this.props.student.error) {
+                this.setState({ "show": true, "method": "post" });
+                setTimeout(() => this.setState({ "show": false }), 3000);
+                setTimeout(() => this.returnToList(), 1000);
+            } else {
+                this.setState({ "showInvalidMessage": true, "method": "post" });
+                setTimeout(() => this.setState({ "showInvalidMessage": false }), 3000);
+            }
+        }, 1000);
     };
 
     updateStudent = event => {
@@ -100,18 +101,20 @@ class Student extends React.Component {
             unpaidLessons: this.state.unpaidLessons,
             moneyOwing: this.state.moneyOwing,
             moneyInAdvance: this.state.moneyInAdvance
-        }; 
-        axios.put("http://localhost:8080/student-api/"+this.state.id, student)
-            .then(response => {
-                if (response.data != null) {
-                    this.setState({ "show": true, "method": "put" });
-                    setTimeout(() => this.setState({ "show": false }), 3000);
-                    setTimeout(() => this.returnToList(), 1000);
-                } else {
-                    this.setState({ "show": false });
-                }
-            });
-        this.setState(this.initialState);
+        };
+
+        this.props.updateStudent(student);
+        setTimeout(() => {
+
+            if (!this.props.student.error) {
+                this.setState({ "show": true, "method": "put" });
+                setTimeout(() => this.setState({ "show": false }), 3000);
+                setTimeout(() => this.returnToList(), 1000);
+            } else {
+                this.setState({ "showInvalidMessage": true, "method": "post" });
+                setTimeout(() => this.setState({ "showInvalidMessage": false }), 3000);
+            }
+        }, 2000);
     }
 
     resetStudent = () => {
@@ -130,6 +133,10 @@ class Student extends React.Component {
             <div>
                 <div style={{ "display": this.state.show ? "block" : "none" }}>
                     <SuccessToast show={this.state.show} message={this.state.method === "put" ? "Student Updated Successfully" : "Student Saved Successfully."} type="success" />
+                </div>
+
+                <div style={{ "display": this.state.showInvalidMessage ? "block" : "none" }}>
+                    <SuccessToast show={this.state.showInvalidMessage} message={"Invalid Data - might be in the data base already"} type="dangerNoSuccess" />
                 </div>
 
                 <Card className={"border border-dark bg-dark text-white"}>
@@ -166,7 +173,7 @@ class Student extends React.Component {
 
                             <Form.Row>
 
-                            <Form.Group as={Col} controlId="formGridIdCardNr">
+                                <Form.Group as={Col} controlId="formGridIdCardNr">
                                     <Form.Label>ID Card Nr</Form.Label>
                                     <Form.Control required
                                         autoComplete="off"
@@ -233,4 +240,22 @@ class Student extends React.Component {
     }
 
 }
-export default Student;
+
+const mapStateToProps = state => {
+    return {
+        //savedStudentObject: state.student,
+        //      studentObject: state.student,
+        //  updatedStudent: state.student.student
+        student: state.student
+    };
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        saveStudent: (student) => dispatch(saveStudent(student)),
+        fetchStudent: (studentId) => dispatch(fetchStudent(studentId)),
+        updateStudent: (student) => dispatch(updateStudent(student))
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Student);

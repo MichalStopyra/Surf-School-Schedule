@@ -2,13 +2,16 @@ import React from 'react';
 
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { Card, Table, ButtonGroup, Button, InputGroup, FormControl } from 'react-bootstrap';
+import { Alert, Card, Table, ButtonGroup, Button, InputGroup, FormControl } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChalkboardTeacher, faWallet, faEdit, faTrash, faUserPlus, faStepBackward, faFastBackward, faStepForward, faFastForward, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
 import SuccessToast from '../SuccessToast';
 
 import './../../style/Style.css';
 
+
+import { connect } from 'react-redux';
+import { deleteInstructor, fetchAllInstructors, searchInstructors } from './../../services/index';
 
 class InstructorList extends React.Component {
 
@@ -23,46 +26,35 @@ class InstructorList extends React.Component {
         };
     }
 
-    componentDidMount() {
-        this.findAllInstructors(this.state.currentPage);
-    }
 
-    findAllInstructors(currentPage) {
-        currentPage -= 1;
-        let sortDirection = this.state.sortToggle ? "asc" : "desc";
-        axios.get("http://localhost:8080/instructor-api/list?page=" + currentPage + "&size=" + this.state.instructorsPerPage + "&sortBy=paymentStatus&sortDir=" + sortDirection)
-            .then(response => response.data)
-            .then((data) => {
-                this.setState({
-                    instructors: data.content,
-                    totalPages: data.totalPages,
-                    totalElements: data.totalElements,
-                    currentPage: data.number + 1
-                });
-            });
+    componentDidMount() {
+        this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection);
     }
 
     deleteInstructor = (idInstructor) => {
-        axios.delete("http://localhost:8080/instructor-api/list/" + idInstructor)
-            .then(response => {
-                if (response.data != null) {
-                    this.setState({ "show": true });
-                    setTimeout(() => this.setState({ "show": false }), 3000);
-                    this.setState({
-                        instructors: this.state.instructors.filter(instructor => instructor.id !== idInstructor)
-                    });
-                } else {
-                    this.setState({ "show": false });
-                }
-            });
-    }
+
+        this.props.deleteInstructor(idInstructor);
+
+        setTimeout(() => {
+            if (this.props.instructor != null) {
+                this.setState({ "show": true });
+                setTimeout(() => this.setState({ "show": false }), 1000);
+
+            } else {
+                this.setState({ "show": false });
+            }
+        }, 1000);
+        this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection);
+
+    };
 
     changePage = event => {
         let target = parseInt(event.target.value);
-        if(this.state.searchedInstructor) {
+        if (this.props.instructor.searchedInstructor) {
             this.searchInstructor(target)
         } else {
-            this.findAllInstructors(target);
+            let sortDirection = this.state.sortToggle ? "asc" : "desc";
+            this.props.fetchAllInstructors(target, this.state.instructorsPerPage, this.props.instructor.sortDirection);
         }
         this.setState({
             [event.target.name]: target
@@ -72,83 +64,93 @@ class InstructorList extends React.Component {
 
     firstPage = () => {
         let firstPage = 1;
-        if (this.state.currentPage > firstPage) {
-            if(this.state.searchedInstructor) {
-                this.searchInstructor(firstPage)
+
+        if (this.props.instructor.currentPage > firstPage) {
+            this.props.instructor.currentPage = 1;
+            if (this.props.instructor.searchedInstructor) {
+                this.searchInstructor(this.props.instructor.currentPage)
             } else {
-                this.findAllInstructors(firstPage);
-            }        }
+                let sortDirection = this.state.sortToggle ? "asc" : "desc";
+                this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection);
+            }
+        }
     };
 
     prevPage = () => {
-        let prevPage = this.state.currentPage - 1;
-        if (this.state.currentPage > 1) {
-            if(this.state.searchedInstructor) {
-                this.searchInstructor(prevPage)
+        if (this.props.instructor.currentPage > 1) {
+            --this.props.instructor.currentPage;
+            if (this.props.instructor.searchedInstructor) {
+                this.searchInstructor(this.props.instructor.currentPage)
             } else {
-                this.findAllInstructors(prevPage);
-            }        }
+                let sortDirection = this.state.sortToggle ? "asc" : "desc";
+                this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection);
+            }
+        }
     };
 
     lastPage = () => {
-        // let instructorsLength = this.props.instructorData.instructors.length;
         let instructorsLength = this.state.instructors.length;
-        let lastPage = Math.ceil(this.state.totalElements / this.state.instructorsPerPage);
-        if (this.state.currentPage < lastPage) {
-            if(this.state.searchedInstructor) {
-                this.searchInstructor(lastPage)
+        let lastPage = Math.ceil(this.props.totalElements / this.state.instructorsPerPage);
+        if (this.props.instructor.currentPage < lastPage) {
+            this.props.instructor.currentPage = lastPage;
+            if (this.props.instructor.searchedInstructor) {
+                this.searchInstructor(this.props.instructor.currentPage)
             } else {
-                this.findAllInstructors(lastPage);
-            }        }
+                this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection);
+            }
+        }
     };
 
     nextPage = () => {
-        let nextPage = this.state.currentPage + 1;
-        if (this.state.currentPage < Math.ceil(this.state.totalElements / this.state.instructorsPerPage)) {
-            if(this.state.searchedInstructor) {
-                this.searchInstructor(nextPage)
+        if (this.state.currentPage < Math.ceil(this.props.totalElements / this.state.instructorsPerPage)) {
+            ++this.props.instructor.currentPage;
+
+            if (this.props.instructor.searchedInstructor) {
+                this.searchInstructor(this.props.instructor.currentPage)
             } else {
-                this.findAllInstructors(nextPage);
-            }          }
+                let sortDirection = this.state.sortToggle ? "asc" : "desc";
+                this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection);
+            }
+        }
     };
 
     searchChange = event => {
-        this.setState({
-            [event.target.name]: event.target.value
-        });
+        this.props.instructor.searchedInstructor = event.target.value;
+        this.forceUpdate();
     };
 
     cancelSearch = () => {
-        this.setState({ "searchedInstructor" : ''})
+        this.props.instructor.searchedInstructor = '';
+        this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection);
+        this.forceUpdate();
     };
 
     sortData = () => {
-        this.setState(state => ({
-            sortToggle: !state.sortToggle
-        }));
+       // console.log(this.props.instructor.sortDirection);
+        if (this.props.instructor.sortDirection === "asc")
+            this.props.instructor.sortDirection = "desc";
+        else
+            this.props.instructor.sortDirection = "asc";
+         //   console.log(this.props.instructor.sortDirection);
 
-        this.findAllInstructors(this.state.currentPage);
+        this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection);
+
     }
 
     searchInstructor = (currentPage) => {
-        currentPage -= 1;
-        axios.get("http://localhost:8080/instructor-api/search/"+this.state.searchedInstructor+"?page=" + currentPage + "&size=" + this.state.instructorsPerPage)
-            .then(response => response.data)
-            .then((data) => {
-                this.setState({
-                    instructors: data.content,
-                    totalPages: data.totalPages,
-                    totalElements: data.totalElements,
-                    currentPage: data.number + 1
-                });
-            });
+        if (this.props.instructor.searchedInstructor)
+            this.props.searchInstructors(this.props.instructor.searchedInstructor, this.props.instructor.currentPage, this.props.instructor.instructorsPerPage);
     }
 
-
-
     render() {
-        const { instructors, currentPage, totalPages, searchedInstructor } = this.state;
-
+        const searchedInstructor = this.props.instructor.searchedInstructor;
+        const totalPages = this.props.instructor.totalPages;
+        const totalElements = this.props.instructor.totalElements;
+        const instructor = this.props.instructor;
+        const instructors = this.props.instructors;
+        const currentPage = this.props.instructor.currentPage;
+        const sortDirection = this.props.instructor.sortDirection;
+        
         const pageNumCss = {
             width: "45px",
             border: "1px solid #F8F8FF",
@@ -168,9 +170,16 @@ class InstructorList extends React.Component {
 
         return (
             <div>
+
                 <div style={{ "display": this.state.show ? "block" : "none" }}>
                     <SuccessToast show={this.state.show} message="Instructor Deleted Successfully." type="danger" />
                 </div>
+
+                {/* {instructorData.error ?
+                <Alert variant="danger">
+                    {instructorData.error}
+
+                </Alert> : */}
                 <Card className={"border border-dark bg-dark text-white"}>
                     <Card.Header>
                         <div style={{ "float": "left" }}>
@@ -179,25 +188,26 @@ class InstructorList extends React.Component {
 
                         <div style={{ "float": "right" }}>
                             <InputGroup size="sm">
-                                <FormControl style={searchBoxCss} className={"bg-dark"} name="searchedInstructor" value={searchedInstructor} placeholder = "Search"
+                                <FormControl style={searchBoxCss} className={"bg-dark"} name="searchedInstructor" value={searchedInstructor} placeholder="Search"
                                     onChange={this.searchChange} />
                                 <InputGroup.Append>
-                                    <Button size="sm" variant="outline-info" type="button" onClick = {this.searchInstructor}>
+                                    <Button size="sm" variant="outline-info" type="button" onClick={this.searchInstructor}>
                                         <FontAwesomeIcon icon={faSearch} />
                                     </Button>
-                                    <Button size="sm" variant="outline-danger" type="button" onClick = {this.cancelSearch}>
+                                    <Button size="sm" variant="outline-danger" type="button" onClick={this.cancelSearch}>
                                         <FontAwesomeIcon icon={faTimes} />
                                     </Button>
                                 </InputGroup.Append>
                             </InputGroup>
                         </div>
 
+
                     </Card.Header>
                     <Card.Body>
                         <Table striped bordered hover variant="dark">
                             <thead>
                                 <tr>
-                                    <th onClick={this.sortData}>Last Name<div className={this.state.sortToggle ? "arrow arrow-down" : "arrow arrow-up"} /></th>
+                                    <th onClick={this.sortData}>Last Name<div className={sortDirection ==="asc" ? "arrow arrow-down" : "arrow arrow-up"} /></th>
                                     <th>First Name</th>
                                     <th>Nr Hours Week</th>
                                     <th>Week's Wage</th>
@@ -208,12 +218,12 @@ class InstructorList extends React.Component {
 
 
                             <tbody>
-                                {this.state.instructors.length === 0 ?
+                                {instructors.length === 0 ?
                                     <tr align="center">
                                         <td colSpan="10"> No Instructors in the Data Base</td>
                                     </tr> :
 
-                                    this.state.instructors.map((instructor, index) => (
+                                    instructors.map((instructor, index) => (
                                         <tr key={instructor.id}>
                                             <td>{instructor.lastName}</td>
                                             <td>{instructor.firstName}</td>
@@ -273,10 +283,34 @@ class InstructorList extends React.Component {
 
                     </Card.Footer>
                 </Card>
+
             </div>
         );
     }
 
 }
 
-export default InstructorList;
+const mapStateToProps = state => {
+    return {
+        instructor: state.instructor,
+        instructors: state.instructor.instructors,
+        totalPages: state.instructor.totalPages,
+        totalElements: state.instructor.totalElements,
+        currentPage: state.instructor.currentPage,
+        searchedInstructor: state.instructor.searchedInstructor,
+        sortDirection: state.instructor.sortDirection
+    }
+};
+
+
+const mapDispatchToProps = dispatch => {
+    return {
+        fetchAllInstructors: (currentPage, size, sortDir) => dispatch(fetchAllInstructors(currentPage, size, sortDir)),
+        deleteInstructor: (instructorId) => dispatch(deleteInstructor(instructorId)),
+        searchInstructors: (searchedInstructor, currentPage, sizePage) => dispatch(searchInstructors(searchedInstructor, currentPage, sizePage))
+    }
+
+};
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(InstructorList);

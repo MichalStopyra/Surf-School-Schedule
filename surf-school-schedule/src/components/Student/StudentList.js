@@ -1,14 +1,16 @@
 import React from 'react';
 
-import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { Card, Table, ButtonGroup, Button, InputGroup, FormControl } from 'react-bootstrap';
+import { Alert, Card, Table, ButtonGroup, Button, InputGroup, FormControl } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUsers, faWallet, faEdit, faTrash, faUserPlus, faStepBackward, faFastBackward, faStepForward, faFastForward, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
 import SuccessToast from '../SuccessToast';
 
 import './../../style/Style.css';
 
+
+import { connect } from 'react-redux';
+import { deleteStudent, fetchAllStudents, searchStudents } from './../../services/index';
 
 class StudentList extends React.Component {
 
@@ -19,50 +21,39 @@ class StudentList extends React.Component {
             currentPage: 1,
             studentsPerPage: 5,
             searchedStudent: '',
-            sortToggle: false
+            sortToggle: true
         };
     }
 
-    componentDidMount() {
-        this.findAllStudents(this.state.currentPage);
-    }
 
-    findAllStudents(currentPage) {
-        currentPage -= 1;
-        let sortDirection = this.state.sortToggle ? "asc" : "desc";
-        axios.get("http://localhost:8080/student-api/list?page=" + currentPage + "&size=" + this.state.studentsPerPage + "&sortBy=paymentStatus&sortDir=" + sortDirection)
-            .then(response => response.data)
-            .then((data) => {
-                this.setState({
-                    students: data.content,
-                    totalPages: data.totalPages,
-                    totalElements: data.totalElements,
-                    currentPage: data.number + 1
-                });
-            });
+    componentDidMount() {
+        this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection);
     }
 
     deleteStudent = (idStudent) => {
-        axios.delete("http://localhost:8080/student-api/list/" + idStudent)
-            .then(response => {
-                if (response.data != null) {
-                    this.setState({ "show": true });
-                    setTimeout(() => this.setState({ "show": false }), 3000);
-                    this.setState({
-                        students: this.state.students.filter(student => student.id !== idStudent)
-                    });
-                } else {
-                    this.setState({ "show": false });
-                }
-            });
-    }
+
+        this.props.deleteStudent(idStudent);
+
+        setTimeout(() => {
+            if (this.props.student != null) {
+                this.setState({ "show": true });
+                setTimeout(() => this.setState({ "show": false }), 1000);
+
+            } else {
+                this.setState({ "show": false });
+            }
+        }, 1000);
+        this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection);
+
+    };
 
     changePage = event => {
         let target = parseInt(event.target.value);
-        if(this.state.searchedStudent) {
+        if (this.props.student.searchedStudent) {
             this.searchStudent(target)
         } else {
-            this.findAllStudents(target);
+            let sortDirection = this.state.sortToggle ? "asc" : "desc";
+            this.props.fetchAllStudents(target, this.state.studentsPerPage, this.props.student.sortDirection);
         }
         this.setState({
             [event.target.name]: target
@@ -72,83 +63,92 @@ class StudentList extends React.Component {
 
     firstPage = () => {
         let firstPage = 1;
-        if (this.state.currentPage > firstPage) {
-            if(this.state.searchedStudent) {
-                this.searchStudent(firstPage)
+
+        if (this.props.student.currentPage > firstPage) {
+            this.props.student.currentPage = 1;
+            if (this.props.student.searchedStudent) {
+                this.searchStudent(this.props.student.currentPage)
             } else {
-                this.findAllStudents(firstPage);
-            }        }
+                let sortDirection = this.state.sortToggle ? "asc" : "desc";
+                this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection);
+            }
+        }
     };
 
     prevPage = () => {
-        let prevPage = this.state.currentPage - 1;
-        if (this.state.currentPage > 1) {
-            if(this.state.searchedStudent) {
-                this.searchStudent(prevPage)
+        if (this.props.student.currentPage > 1) {
+            --this.props.student.currentPage;
+            if (this.props.student.searchedStudent) {
+                this.searchStudent(this.props.student.currentPage)
             } else {
-                this.findAllStudents(prevPage);
-            }        }
+                let sortDirection = this.state.sortToggle ? "asc" : "desc";
+                this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection);
+            }
+        }
     };
 
     lastPage = () => {
-        // let studentsLength = this.props.studentData.students.length;
         let studentsLength = this.state.students.length;
-        let lastPage = Math.ceil(this.state.totalElements / this.state.studentsPerPage);
-        if (this.state.currentPage < lastPage) {
-            if(this.state.searchedStudent) {
-                this.searchStudent(lastPage)
+        let lastPage = Math.ceil(this.props.totalElements / this.state.studentsPerPage);
+        if (this.props.student.currentPage < lastPage) {
+            this.props.student.currentPage = lastPage;
+            if (this.props.student.searchedStudent) {
+                this.searchStudent(this.props.student.currentPage)
             } else {
-                this.findAllStudents(lastPage);
-            }        }
+                this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection);
+            }
+        }
     };
 
     nextPage = () => {
-        let nextPage = this.state.currentPage + 1;
-        if (this.state.currentPage < Math.ceil(this.state.totalElements / this.state.studentsPerPage)) {
-            if(this.state.searchedStudent) {
-                this.searchStudent(nextPage)
+        if (this.state.currentPage < Math.ceil(this.props.totalElements / this.state.studentsPerPage)) {
+            ++this.props.student.currentPage;
+
+            if (this.props.student.searchedStudent) {
+                this.searchStudent(this.props.student.currentPage)
             } else {
-                this.findAllStudents(nextPage);
-            }          }
+                let sortDirection = this.state.sortToggle ? "asc" : "desc";
+                this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection);
+            }
+        }
     };
 
     searchChange = event => {
-        this.setState({
-            [event.target.name]: event.target.value
-        });
+        this.props.student.searchedStudent = event.target.value;
+        this.forceUpdate();
     };
 
     cancelSearch = () => {
-        this.setState({ "searchedStudent" : ''})
+        this.props.student.searchedStudent = '';
+        this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection);
+        this.forceUpdate();
     };
 
     sortData = () => {
-        this.setState(state => ({
-            sortToggle: !state.sortToggle
-        }));
+       // console.log(this.props.student.sortDirection);
+        if (this.props.student.sortDirection === "asc")
+            this.props.student.sortDirection = "desc";
+        else
+            this.props.student.sortDirection = "asc";
+         //   console.log(this.props.student.sortDirection);
 
-        this.findAllStudents(this.state.currentPage);
+        this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection);
+
     }
 
     searchStudent = (currentPage) => {
-        currentPage -= 1;
-        axios.get("http://localhost:8080/student-api/search/"+this.state.searchedStudent+"?page=" + currentPage + "&size=" + this.state.studentsPerPage)
-            .then(response => response.data)
-            .then((data) => {
-                this.setState({
-                    students: data.content,
-                    totalPages: data.totalPages,
-                    totalElements: data.totalElements,
-                    currentPage: data.number + 1
-                });
-            });
+        if (this.props.student.searchedStudent)
+            this.props.searchStudents(this.props.student.searchedStudent, this.props.student.currentPage, this.props.student.studentsPerPage);
     }
 
-
-
     render() {
-        const { students, currentPage, totalPages, searchedStudent } = this.state;
-     
+        const searchedStudent = this.props.student.searchedStudent;
+        const totalPages = this.props.student.totalPages;
+        const totalElements = this.props.student.totalElements;
+        const student = this.props.student;
+        const students = this.props.students;
+        const currentPage = this.props.student.currentPage;
+        const sortDirection = this.props.student.sortDirection;
 
         const pageNumCss = {
             width: "45px",
@@ -202,7 +202,7 @@ class StudentList extends React.Component {
                                     <th>First Name</th>
                                     <th>ID Card</th>
                                     <th>Phone Nr</th>
-                                    <th onClick={this.sortData}>Payment Status<div className={this.state.sortToggle ? "arrow arrow-down" : "arrow arrow-up"} /> </th>
+                                    <th onClick={this.sortData}>Payment Status<div className={sortDirection === "asc" ? "arrow arrow-down" : "arrow arrow-up"} /> </th>
                                     <th>Lesson Hrs</th>
                                     <th>Unpaid Lessons</th>
                                     <th>Money Owing [zl]</th>
@@ -214,12 +214,12 @@ class StudentList extends React.Component {
 
 
                             <tbody>
-                                {this.state.students.length === 0 ?
+                                {students.length === 0 ?
                                     <tr align="center">
                                         <td colSpan="10"> No Students in the Data Base</td>
                                     </tr> :
 
-                                    this.state.students.map((student, index) => (
+                                    students.map((student, index) => (
                                         <tr key={student.id}>
                                             <td>{student.lastName}</td>
                                             <td>{student.firstName}</td>
@@ -289,4 +289,27 @@ class StudentList extends React.Component {
 
 }
 
-export default StudentList;
+const mapStateToProps = state => {
+    return {
+        student: state.student,
+        students: state.student.students,
+        totalPages: state.student.totalPages,
+        totalElements: state.student.totalElements,
+        currentPage: state.student.currentPage,
+        searchedStudent: state.student.searchedStudent,
+        sortDirection: state.student.sortDirection
+    }
+};
+
+
+const mapDispatchToProps = dispatch => {
+    return {
+        fetchAllStudents: (currentPage, size, sortDir) => dispatch(fetchAllStudents(currentPage, size, sortDir)),
+        deleteStudent: (studentId) => dispatch(deleteStudent(studentId)),
+        searchStudents: (searchedStudent, currentPage, sizePage) => dispatch(searchStudents(searchedStudent, currentPage, sizePage))
+    }
+
+};
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(StudentList);
