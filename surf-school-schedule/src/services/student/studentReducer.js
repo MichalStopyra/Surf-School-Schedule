@@ -17,7 +17,6 @@ const initialState = {
 const reducer = (state = initialState, action) => {
     switch (action.type) {
         case FETCH_ALL_STUDENTS_REQUEST:
-            console.log(state);
             return {
                 ...state,
                 students: action.payload,
@@ -74,7 +73,8 @@ const reducer = (state = initialState, action) => {
                 students: action.students,
                 error: ''
             };
-        default: return state;
+        default:
+            return state;
     }
 };
 

@@ -6,12 +6,17 @@ import {
 } from "./studentTypes";
 import axios from 'axios';
 
-export const fetchAllStudents = (currentPage, size, sortDir) => {
+export const fetchAllStudents = (currentPage, size, sortDir, addSelect) => {
     --currentPage;
-    console.log("SAd");
     return dispatch => {
+
         axios.get("http://localhost:8080/student-api/list?page=" + currentPage + "&size=" + size + "&sortBy=paymentStatus&sortDir=" + sortDir)
             .then(response => {
+                if (addSelect)
+                    response.data.content.unshift({
+                        id: -1, lastName: 'Select Student', firstName: '', idCardNr: '', telNr: '', paymentStatus: 0, lessonHours: 0, unpaidLessons: 0, moneyOwing: 0, moneyInAdvance: ''
+                    });
+
                 dispatch(fetchAllStudentsRequest(response.data.content, response.data.totalPages, response.data.totalElements, sortDir));
             })
             .catch(error => {

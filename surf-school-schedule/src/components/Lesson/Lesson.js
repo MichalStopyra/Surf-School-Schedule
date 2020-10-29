@@ -28,24 +28,25 @@ class Lesson extends React.Component {
 
     initialState = {
         id: '', date: 'Select Date', time: 'Select Hour', nrStudents: 'Select Nr of Students', status: 0, howLong: 'Select How Long',
-        students: [], instructors: [], dates: [], times: [], nrStudTable: [], howLongTable: []
-    //    / instructor: {
-    //         id: '', lastName: 'Select Instructor', firstName: '', NrHoursWeek: 0, NrHoursFull: 0, WeekWage: 0
-    //     },
-    //     student: {
-    //         id: '', lastName: 'Select Student', firstName: '', idCardNr: '', telNr: '', paymentStatus: 0, lessonHours: 0, unpaidLessons: 0, moneyOwing: 0, moneyInAdvance: ''
-    //     }
+        students: [], instructors: [], dates: [], times: [], nrStudTable: [], howLongTable: [],
+        instructor: {
+            id: '', lastName: 'Select Instructor', firstName: '', NrHoursWeek: 0, NrHoursFull: 0, WeekWage: 0
+        },
+        student: {
+            id: '', lastName: 'Select Student', firstName: '', idCardNr: '', telNr: '', paymentStatus: 0, lessonHours: 0, unpaidLessons: 0, moneyOwing: 0, moneyInAdvance: ''
+        }
     }
 
     componentDidMount() {
         const idLesson = +this.props.match.params.id;
 
+
+        this.findAllStudents(!idLesson);
+        this.findAllInstructors(!idLesson);
+
         if (idLesson) {
             this.findLessonById(idLesson);
         }
-
-        this.findAllStudents();
-        this.findAllInstructors();
 
         this.setArrays();
     };
@@ -160,51 +161,16 @@ class Lesson extends React.Component {
 
     }
 
-    // findAllStudents = () => {
-    //     axios.get("http://localhost:8080/student-api/list?page=0&size=999999999&sortBy=paymentStatus&sortDir=desc")
-    //         .then(response => response.data)
-    //         .then((data) => {
 
-    //             if (!this.state.students.length)
-    //                 this.state.students.push(this.initialState.student);
-    //             this.setState({
-    //                 students: this.state.students.concat(data.content)
-    //             });
-
-    //             if (this.state.id)
-    //                 this.setState({
-    //                     students: this.state.students.filter(student => student.id !== this.state.students[0].id)
-    //                 });
-
-    //         });
-
-    // };
-
-    findAllStudents = () => {
-        this.props.fetchAllStudents(1,999999999, "asc");
+    findAllStudents = (addSelect) => {
+        this.props.fetchAllStudents(1, 999999999, "asc", addSelect);
     }
 
 
 
-    findAllInstructors = () => {
-        // axios.get("http://localhost:8080/instructor-api/list?page=0&size=999999999&sortBy=paymentStatus&sortDir=desc")
-        //     .then(response => response.data)
-        //     .then((data) => {
-        //         if (!this.state.instructors.length)
-        //             this.state.instructors.push(this.state.instructor);
-        //         // this.state.instructors.push("Select Instructor");
-
-        //         this.setState({
-        //             instructors: this.state.instructors.concat(data.content)
-        //         });
-
-        //         if (this.state.id)
-        //             this.setState({
-        //                 instructors: this.state.instructors.filter(instructor => instructor.id !== this.state.instructors[0].id)
-        //             });
-
-        //     });
-        this.props.fetchAllInstructors(1,999999999, "asc");
+    findAllInstructors = (addSelect) => {
+        this.props.fetchAllInstructors(1, 999999999, "asc", addSelect);
+     
     };
 
 
@@ -212,6 +178,8 @@ class Lesson extends React.Component {
         axios.get("http://localhost:8080/lesson-api/" + idLesson)
             .then(response => {
                 if (response.data != null) {
+                    this.props.student.students.unshift(response.data.student);
+                    this.props.instructor.instructors.unshift(response.data.instructor);
                     this.setState({
                         id: response.data.id,
                         instructor: response.data.instructor,
@@ -230,7 +198,7 @@ class Lesson extends React.Component {
     };
 
     returnToList = () => {
-        return this.props.history.push("/lessons");
+        return this.props.history.push("/schedule");
     };
 
     isValid = () => {
@@ -263,20 +231,19 @@ class Lesson extends React.Component {
             nrStudents: this.state.nrStudents,
             status: this.state.status
         };
-
-        axios.post("http://localhost:8080/lesson-api/list", lesson)
-            .then(response => {
-                if (response.data != null) {
+        this.props.saveLesson(lesson);
+            setTimeout(() => {
+                if (!this.props.lesson.error) {
                     this.setState({ "show": true, "method": "post" });
                     setTimeout(() => this.setState({ "show": false }), 3000);
                     setTimeout(() => this.returnToList(), 1000);
                 } else {
-                    this.setState({ "show": false });
+                    this.setState({ "showInvalidMessage": true, "method": "post" });
+                    setTimeout(() => this.setState({ "showInvalidMessage": false }), 3000);
                 }
-            });
-        this.setState(this.initialState);
-
+            }, 1000);
     };
+
 
     updateLesson = event => {
         event.preventDefault();
@@ -300,17 +267,18 @@ class Lesson extends React.Component {
             status: this.state.status
         };
 
-        axios.put("http://localhost:8080/lesson-api/" + this.state.id, lesson)
-            .then(response => {
-                if (response.data != null) {
-                    this.setState({ "show": true, "method": "put" });
-                    setTimeout(() => this.setState({ "show": false }), 3000);
-                    setTimeout(() => this.returnToList(), 1000);
-                } else {
-                    this.setState({ "show": false });
-                }
-            });
-        this.setState(this.initialState);
+        this.props.updateLesson(lesson);
+        setTimeout(() => {
+
+            if (!this.props.student.error) {
+                this.setState({ "show": true, "method": "put" });
+                setTimeout(() => this.setState({ "show": false }), 3000);
+                setTimeout(() => this.returnToList(), 1000);
+            } else {
+                this.setState({ "showInvalidMessage": true, "method": "post" });
+                setTimeout(() => this.setState({ "showInvalidMessage": false }), 3000);
+            }
+        }, 2000);
     }
 
     resetLesson = () => {
@@ -340,9 +308,9 @@ class Lesson extends React.Component {
     }
 
     render() {
-        const { /*student, instructor,*/ date, time, howLong, nrStudents } = this.state;
-        const instructor = this.props.instructor;
-        const student = this.props.student;
+        const { student, instructor, date, time, howLong, nrStudents } = this.state;
+        const instructors = this.props.instructor.instructors;
+        const students = this.props.student.students;
 
         return (
             <div>
@@ -367,11 +335,15 @@ class Lesson extends React.Component {
                                         value={student}
                                         onChange={this.lessonChange}
                                         className={"bg-dark text-white"} >
-                                        {this.state.students.map(student =>
-                                            <option key={student.id} value={JSON.stringify(student)}>
-                                                {student.lastName + " " + student.firstName}
-                                            </option>
-                                        )}
+                                        {students.filter((item, index, self) =>
+                                            index === self.findIndex((e) => (
+                                                e.id === item.id)
+                                            ))
+                                            .map(student =>
+                                                <option key={student.id} value={JSON.stringify(student)}>
+                                                    {student.lastName + " " + student.firstName}
+                                                </option>
+                                            )}
                                     </Form.Control>
                                 </Form.Group>
 
@@ -383,7 +355,10 @@ class Lesson extends React.Component {
                                         value={instructor}
                                         onChange={this.lessonChangeInstructor}
                                         className={"bg-dark text-white"} >
-                                        {this.state.instructors.filter((item, index) => this.state.instructors.indexOf(item) === index)
+                                        {instructors.filter((item, index, self) =>
+                                            index === self.findIndex((e) => (
+                                                e.id === item.id)
+                                            ))
                                             .map(instructor =>
                                                 <option key={instructor.id} value={JSON.stringify(instructor)}>
                                                     {instructor.lastName + " " + instructor.firstName}
@@ -505,8 +480,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        fetchAllStudents: (currentPage, size, sortDir) => dispatch(fetchAllStudents(currentPage, size, sortDir)),
-        fetchAllInstructors: (currentPage, size, sortDir) => dispatch(fetchAllInstructors(currentPage, size, sortDir)),
+        fetchAllStudents: (currentPage, size, sortDir, addSelect) => dispatch(fetchAllStudents(currentPage, size, sortDir, addSelect)),
+        fetchAllInstructors: (currentPage, size, sortDir, addSelect) => dispatch(fetchAllInstructors(currentPage, size, sortDir, addSelect)),
         saveLesson: (lesson) => dispatch(saveLesson(lesson)),
         fetchLesson: (lessonId) => dispatch(fetchLesson(lessonId)),
         updateLesson: (lesson) => dispatch(updateLesson(lesson))

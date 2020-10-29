@@ -8,7 +8,7 @@ import { faUsers, faWallet, faEdit, faTrash, faUserPlus, faStepBackward, faFastB
 import SuccessToast from '../SuccessToast';
 
 import { connect } from 'react-redux';
-import { deleteLesson, fetchAllLessons, searchLessons } from './../../services/index';
+import { deleteLesson, fetchAllLessons, searchLessons, updateLesson } from './../../services/index';
 
 import './../../style/Style.css';
 
@@ -28,20 +28,29 @@ class LessonList extends React.Component {
 
     componentDidMount() {
         this.props.fetchAllLessons(this.props.lesson.currentPage, this.state.lessonsPerPage, this.props.lesson.sortDirection);
+        setTimeout(() => {
+            this.checkIfLessonInThePast();
+        }, 1000)
     }
 
 
-    //change status of lessons that have their date in the past and were not given into not given
+    //change status of lessons that have their date in the past (24 h back) and were not given into not given
     checkIfLessonInThePast() {
-        let today = new Date();
+        let yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
 
-        for (let i = 0; i < this.state.lessons.length; ++i) {
-            let temp = new Date(this.state.lessons[i].date);
-            if (this.state.lessons[i].status === "To_Give" && temp < today) {
-                console.log("asd");
-                this.lessonStatusChange(this.state.lessons[i], 3)
+        let length = this.props.lesson.lessons.length;
+        let renderFlag = false;
+        for (let i = 0; i < length; ++i) {
+            let temp = new Date(this.props.lesson.lessons[i].date);
+            if (this.props.lesson.lessons[i].status === "To_Give" && temp < yesterday) {
+                this.lessonStatusChange(this.props.lesson.lessons[i], 3)
+                //flag so that component is not unnecessarily rendered 
+                if (!renderFlag)
+                    renderFlag = true;
             }
         }
+        if (renderFlag)
+            this.props.fetchAllLessons(this.props.lesson.currentPage, this.state.lessonsPerPage, this.props.lesson.sortDirection);
     };
 
     deleteLesson = (idLesson) => {
@@ -139,13 +148,10 @@ class LessonList extends React.Component {
     };
 
     sortData = () => {
-        // console.log(this.props.lesson.sortDirection);
         if (this.props.lesson.sortDirection === "asc")
             this.props.lesson.sortDirection = "desc";
         else
             this.props.lesson.sortDirection = "asc";
-        //   console.log(this.props.lesson.sortDirection);
-
         this.props.fetchAllLessons(this.props.lesson.currentPage, this.state.lessonsPerPage, this.props.lesson.sortDirection);
 
     }
@@ -158,22 +164,8 @@ class LessonList extends React.Component {
 
     lessonStatusChange = (lesson, newStatus) => {
         lesson.status = newStatus;
-        axios.put("http://localhost:8080/lesson-api/" + lesson.id, lesson)
-            .then(response => {
-                if (response.data != null) {
-                    // this.setState({ "show": true, "method": "put" });
-                    // setTimeout(() => this.setState({ "show": false }), 3000);
-                    // setTimeout(() => this.returnToList(), 1000);
-                    console.log("success");
-                } else {
-                    console.log(":(");
-                    // this.setState({ "show": false });
-                }
-            });
-        console.log(this);
-        this.findAllLessons(this.state.currentPage);
-        this.findAllLessons(this.state.currentPage);
-
+        this.props.updateLesson(lesson);
+        this.props.fetchAllLessons(this.props.lesson.currentPage, this.state.lessonsPerPage, this.props.lesson.sortDirection);
     }
 
 
@@ -206,10 +198,10 @@ class LessonList extends React.Component {
 
         return (
             <div>
-                <div style={{ "display": this.state.show ? "block" : "none" }}>
-                    <SuccessToast show={this.state.show} message="Lesson Deleted Successfully." type="danger" />
+                <div style={{ "float": "right" }}>
+
                 </div>
-                <Card className={"border border-dark bg-dark text-white"}>
+                <Card className={" bg-dark text-white"}>
                     <Card.Header>
                         <div style={{ "float": "left" }}>
                             <FontAwesomeIcon icon={faUsers} />     Lessons List
@@ -338,7 +330,8 @@ const mapDispatchToProps = dispatch => {
     return {
         fetchAllLessons: (currentPage, size, sortDir) => dispatch(fetchAllLessons(currentPage, size, sortDir)),
         deleteLesson: (lessonId) => dispatch(deleteLesson(lessonId)),
-        searchLessons: (searchedLesson, currentPage, sizePage) => dispatch(searchLessons(searchedLesson, currentPage, sizePage))
+        searchLessons: (searchedLesson, currentPage, sizePage) => dispatch(searchLessons(searchedLesson, currentPage, sizePage)),
+        updateLesson: (lesson) => dispatch(updateLesson(lesson))
     }
 
 };

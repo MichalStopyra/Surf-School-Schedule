@@ -6,12 +6,16 @@ import {
 } from "./instructorTypes";
 import axios from 'axios';
 
-export const fetchAllInstructors = (currentPage, size, sortDir) => {
+export const fetchAllInstructors = (currentPage, size, sortDir, addSelect) => {
     --currentPage;
     return dispatch => {
         // dispatch(fetchAllInstructorsRequest());???????????????????????????
         axios.get("http://localhost:8080/instructor-api/list?page=" + currentPage + "&size=" + size + "&sortBy=paymentStatus&sortDir=" + sortDir)
             .then(response => {
+                if (addSelect)
+                response.data.content.unshift({
+                             id: '', lastName: 'Select Instructor', firstName: '', NrHoursWeek: 0, NrHoursFull: 0, WeekWage: 0
+                         });
                 dispatch(fetchAllInstructorsSuccess(response.data.content, response.data.totalPages, response.data.totalElements, sortDir));
             })
             .catch(error => {

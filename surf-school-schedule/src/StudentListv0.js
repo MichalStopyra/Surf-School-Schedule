@@ -1,453 +1,252 @@
 import React from 'react';
-import { Form, Card, Col, Button } from 'react-bootstrap';
-import { faSave, faUndo, faArrowLeft, faEdit, faPlusSquare, faLanguage } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
-import SuccessToast from '../SuccessToast';
-import Instructor from '../Instructor/Instructor';
 
-class Lesson extends React.Component {
+import axios from 'axios';
+import { Card, Table, ButtonGroup, Button, InputGroup, FormControl } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCalendarAlt, faTimes } from '@fortawesome/free-solid-svg-icons';
+import SuccessToast from '../SuccessToast';
+import Popover from '../Popover';
+import InstructorDay from './InstructorDay';
+import LessonForm from './LessonForm';
+
+import './../../style/Style.css';
+
+import { connect } from 'react-redux';
+import { updateLesson, deleteLesson } from '../../services/index';
+
+
+
+class Schedule extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = this.initialState;
-        this.state.show = false;
-        this.state.showInvalidMessage = false;
+        let today = new Date();
+        this.state = {
+            date: today.getMonth() + 1 + '-' + today.getDate() + '-' + today.getFullYear(),
+            instructors: [],
+            lessons: [],
+            instructorDay: [],
+            currentPage: 1,
+            lessonsPerPage: 5,
+            searchedLesson: '',
+            sortToggle: false,
+            showForm: true
+        };
+        // this.getFieldColor = this.getFieldColor.bind(this);
 
-        this.state.method = 'post';
-        this.lessonChange = this.lessonChange.bind(this);
-        this.submitLesson = this.submitLesson.bind(this);
-
-    }
-
-    initialState = {
-        id: '', date: 'Select Date', time: 'Select Hour', nrStudents: 'Select Nr of Students', status: 0, howLong: 'Select How Long',
-        students: [], instructors: [], dates: [], times: [], nrStudTable: [], howLongTable: [],
-        instructor: {
-            id: '', lastName: 'Select Instructor', firstName: '', NrHoursWeek: 0, NrHoursFull: 0, WeekWage: 0
-        },
-        student: {
-            id: '', lastName: 'Select Student', firstName: '', idCardNr: '', telNr: '', paymentStatus: 0, lessonHours: 0, unpaidLessons: 0, moneyOwing: 0, moneyInAdvance: ''
-        }
     }
 
     componentDidMount() {
-        const idLesson = +this.props.match.params.id;
-
-        if (idLesson) {
-            this.findLessonById(idLesson);
-        }
-        this.findAllStudents();
-        this.findAllInstructors();
-        this.setArrays();
-
-    };
-
-
-    arrayWithHours() {
-        var arr = [], i, j;
-        for (i = 9; i < 21; i++) {
-            arr.push(i + ":00");
-        }
-        return arr;
-    };
-
-    addDays(date, days) {
-        var result = new Date(date);
-        result.setDate(result.getDate() + days);
-        return result;
+        this.findAllInstructorsAndSchedules(this.state.date);
     }
 
-    getDateArray(start, end) {
-        var arr = new Array();
-        var dt = new Date(start);
-        while (dt < end) {
-            var dd = dt.getDate();
-            var mm = dt.getMonth() + 1;
-            var yyyy = dt.getFullYear();
-            if (dd < 10) {
-                dd = '0' + dd;
-            }
-            if (mm < 10) {
-                mm = '0' + mm;
-            }
-            var fullDate = dd + '-' + mm + '-' + yyyy;
-            arr.push(fullDate);
-            dt.setDate(dt.getDate() + 1);
-        }
-        return arr;
-    }
 
-    getNrStudArray() {
-        var arr = new Array();
-        for (var i = 1; i < 6; ++i) {
-            arr.push(i);
-        }
-        return arr;
-    }
+    findAllInstructorsAndSchedules(date) {
+        var instructors = [];
 
-    getHowLongArray() {
-        var arr = new Array();
-        for (var i = 1; i < 4; ++i) {
-            arr.push(i);
-        }
-        return arr;
-    }
-
-    setArrays() {
-        this.state.dates.push('Select Date');
-        this.state.times.push('Select Hour');
-        this.state.howLongTable.push('Select How Long');
-        this.state.nrStudTable.push('Select Nr of Students');
-        this.setState({
-            dates: this.state.dates.concat(this.getDateArray(new Date(), this.addDays(new Date(), 7))),
-            times: this.state.times.concat(this.arrayWithHours()),
-            howLongTable: this.state.howLongTable.concat(this.getHowLongArray()),
-            nrStudTable: this.state.nrStudTable.concat(this.getNrStudArray())
-        });
-    }
-
-    findAllStudents = () => {
-        axios.get("http://localhost:8080/student-api/list?page=0&size=999999999&sortBy=paymentStatus&sortDir=desc")
+        axios.get("http://localhost:8080/instructor-api/list?page=0&size=999999999&sortBy=firstName&sortDir=desc")
             .then(response => response.data)
             .then((data) => {
-                if (!this.state.students.length)
-                    this.state.students.push(this.initialState.student);
-                this.setState({
-                    students: this.state.students.concat(data.content)
-                });
-
-                if (this.state.id)
-                    this.setState({
-                        students: this.state.students.filter(student => student.id !== this.state.students[0].id)
-                    });
-            });
-    };
-
-
-
-    findAllInstructors = () => {
-        axios.get("http://localhost:8080/instructor-api/list?page=0&size=999999999&sortBy=paymentStatus&sortDir=desc")
-            .then(response => response.data)
-            .then((data) => {
-                if (!this.state.instructors.length)
-                    this.state.instructors.push(this.state.instructor);
-                // this.state.instructors.push("Select Instructor");
-
-                this.setState({
-                    instructors: this.state.instructors.concat(data.content)
-                });
-
-                if (this.state.id)
-                    this.setState({
-                        instructors: this.state.instructors.filter(instructor => instructor.id !== this.state.instructors[0].id)
-                    });
-
+                instructors = data.content;
+                this.findAllInstructorDay(instructors, date);
             });
 
-    };
-
-
-    findLessonById = (idLesson) => {
-        axios.get("http://localhost:8080/lesson-api/" + idLesson)
-            .then(response => {
-                if (response.data != null) {
-                    this.setState({
-                        id: response.data.id,
-                        instructor: response.data.instructor,
-                        student: response.data.student,
-                        date: response.data.date,
-                        time: response.data.time,
-                        howLong: response.data.howLong,
-                        nrStudents: response.data.nrStudents,
-                        status: response.data.status,
-                    });
-
-                }
-            }).catch((error) => {
-                console.error("Error: " + error);
-            });
-    };
-
-    returnToList = () => {
-        return this.props.history.push("/lessons");
-    };
-
-    isValid = () => {
-        if (this.state.student.lastName === 'Select Student' ||
-            this.state.instructor.lastName === 'Select Instructor' ||
-            this.state.date === 'Select Date' ||
-            this.state.time === 'Select Hour' ||
-            this.state.nrStudents === 'Select Nr of Students' ||
-            this.state.howLong === 'Select How Long') {
-            this.setState({ "showInvalidMessage": true, "method": "post" });
-            setTimeout(() => this.setState({ "showInvalidMessage": false }), 3000);
-            return false;
-        }
-        else
-            return true;
     }
 
-    submitLesson = event => {
-        event.preventDefault();
-        if (!this.isValid()) {
-            return;
-        }
+    findAllInstructorDay(instructors, date) {
+        let allInstrDayTable = [];
+        instructors.forEach(function (instructor) {
+            axios.get("http://localhost:8080/lesson-api/" + instructor.id + "/" + date)
+                .then(response => {
+                    if (response.data != null) {
 
-        const lesson = {
-            instructor: JSON.parse(this.state.instructor),
-            student: JSON.parse(this.state.student),
-            date: this.state.date,
-            time: this.state.time,
-            howLong: this.state.howLong,
-            nrStudents: this.state.nrStudents,
-            status: this.state.status
-        };
+                        let tempInstrDay = {
+                            instructor: '',
+                            lessonsThisDay: []
+                        };
 
-        axios.post("http://localhost:8080/lesson-api/list", lesson)
-            .then(response => {
-                if (response.data != null) {
-                    this.setState({ "show": true, "method": "post" });
-                    setTimeout(() => this.setState({ "show": false }), 3000);
-                    setTimeout(() => this.returnToList(), 1000);
-                } else {
-                    this.setState({ "show": false });
-                }
-            });
-        this.setState(this.initialState);
+                        tempInstrDay.instructor = instructor.firstName + " " + instructor.lastName;
+                        //save when the lessons start 
+                        let tab = response.data.content;
+                        //save lessons at specific indexes in array - representing gour of the lesson
 
-    };
+                        tab.forEach(function (element) {
+                            //get hour and create index
+                            let time = element.time;
+                            time = time.split(":")[0];
+                            //first lesson starts at 9 so minus 9 to get index in the array
+                            let index = time - 9;
 
-    updateLesson = event => {
-        event.preventDefault();
-        if (!this.isValid()) {
-            return;
-        }
-        if (typeof (this.state.instructor) === "object")
-            this.state.instructor = JSON.stringify(this.state.instructor);
-
-        if (typeof (this.state.student) === "object")
-            this.state.student = JSON.stringify(this.state.student);
-
-        const lesson = {
-            id: this.state.id,
-            instructor: JSON.parse(this.state.instructor),
-            student: JSON.parse(this.state.student),
-            date: this.state.date,
-            time: this.state.time,
-            howLong: this.state.howLong,
-            nrStudents: this.state.nrStudents,
-            status: this.state.status
-        };
-
-        axios.put("http://localhost:8080/lesson-api/" + this.state.id, lesson)
-            .then(response => {
-                if (response.data != null) {
-                    this.setState({ "show": true, "method": "put" });
-                    setTimeout(() => this.setState({ "show": false }), 3000);
-                    setTimeout(() => this.returnToList(), 1000);
-                } else {
-                    this.setState({ "show": false });
-                }
-            });
-        this.setState(this.initialState);
-    }
-
-    resetLesson = () => {
-        this.setState(() => this.initialState);
-        this.findAllInstructors();
-        this.findAllStudents();
-        this.setArrays();
-    };
-
-    lessonChange = event => {
+                            //if lesson is 1 hour long -add it to array once; if longer than 1 hour - duplicate it in array
+                            for (let j = 0; j < element.howLong; ++j) {
+                                tempInstrDay.lessonsThisDay[index + j] = element;
+                            }
+                        });
+                        allInstrDayTable.push(tempInstrDay);
+                    }
+                })
+        });
         this.setState({
-            [event.target.name]: event.target.value
+            instructorDay: allInstrDayTable
+        });
+        setTimeout(() => this.forceUpdate(), 500);
+    }
+
+    //change status of lessons that have their date in the past and were not given into not given
+    checkIfLessonInThePast() {
+        let today = new Date();
+
+        for (let i = 0; i < this.state.lessons.length; ++i) {
+            let temp = new Date(this.state.lessons[i].date);
+            if (this.state.lessons[i].status === "To_Give" && temp < today) {
+                console.log("asd");
+                this.lessonStatusChange(this.state.lessons[i], 3)
+            }
+        }
+    };
+
+
+    changePage = event => {
+        let target = parseInt(event.target.value);
+        if (this.state.searchedLesson) {
+            this.searchLesson(target)
+        } else {
+            this.findAllLessons(target);
+        }
+        this.setState({
+            [event.target.name]: target
         });
 
     };
 
-    lessonChangeInstructor = event => {
-        this.setState({
-            [event.target.name]: event.target.value
-        });
-        this.state.instructor = event.target.value;
-        if (typeof (this.state.instructor) === "string")
-            this.state.instructor = JSON.parse(this.state.instructor);
+    prevPage = () => {
+        let prevPage = this.state.currentPage - 1;
+        if (this.state.currentPage > 1) {
+            if (this.state.searchedLesson) {
+                this.searchLesson(prevPage)
+            } else {
+                this.findAllLessons(prevPage);
+            }
+        }
+    };
 
-        console.log(this.state.instructor.id);
-        axios.get("http://localhost:8080/lesson-api/" + this.state.instructor.id + "/" + this.state.date)
-            .then(response => {
-                if (response.data != null) {
+    nextPage = () => {
+        let nextPage = this.state.currentPage + 1;
+        if (this.state.currentPage < Math.ceil(this.state.totalElements / this.state.lessonsPerPage)) {
+            if (this.state.searchedLesson) {
+                this.searchLesson(nextPage)
+            } else {
+                this.findAllLessons(nextPage);
+            }
+        }
+    };
 
-                    let timesTab = response.data.content;
-                    timesTab = timesTab.map(t => t.time);
+    lessonStatusChange = (lesson, newStatus) => {
+        if (!lesson)
+            return;
+        lesson.status = newStatus;
 
-                    this.state.times = [];
-                    this.state.times.push('Select Hour');
-                    this.state.times = this.state.times.concat(this.arrayWithHours());
+        console.log(lesson);
+        this.props.updateLesson(lesson);
+    };
 
-                    this.setState({
-                        times: this.state.times.filter(e => !timesTab.includes(e))
-                    }, () => console.log(this.state.times));
+    deleteLesson = (lesson) => {
+        if (!lesson)
+        return;
+        console.log(lesson);
+        this.props.deleteLesson(lesson.id);
+        this.findAllInstructorsAndSchedules(this.state.date);
 
+        // setTimeout(() => {
+        //     if (this.props.lesson != null) {
+        //         this.setState({ "show": true });
+        //         setTimeout(() => this.setState({ "show": false }), 1000);
 
-                }
-            }).catch((error) => {
-                console.error("Error: " + error);
-            });
+        //     } else {
+        //         this.setState({ "show": false });
+        //     }
+        // }, 1000);
+        //this.props.fetchAllLessons(this.props.lesson.currentPage, this.state.lessonsPerPage, this.props.lesson.sortDirection);
 
+    };
+
+    changeShowForm = () => {
+        this.setState({ "showForm": !this.state.showForm } );
     }
 
     render() {
-        const { student, instructor, date, time, howLong, nrStudents } = this.state;
+        const { instructorDay, instructors } = this.state;
+
         return (
             <div>
-                <div style={{ "display": this.state.show ? "block" : "none" }}>
-                    <SuccessToast show={this.state.show} message={this.state.method === "put" ? "Lesson Updated Successfully" : "Lesson Saved Successfully."} type="success" />
-                </div>
-                <div style={{ "display": this.state.showInvalidMessage ? "block" : "none" }}>
-                    <SuccessToast show={this.state.showInvalidMessage} message={"Fill out the required fields."} type="dangerNoSuccess" />
-                </div>
-
+                <LessonForm showForm = {this.state.showForm} handleClose={() => this.changeShowForm()}></LessonForm>
                 <Card className={"border border-dark bg-dark text-white"}>
                     <Card.Header>
-                        <FontAwesomeIcon icon={this.state.id ? faEdit : faPlusSquare} /> {this.state.id ? "Update Lesson" : "Add New Lesson"}
+                        <div style={{ "float": "left" }}>
+                            <FontAwesomeIcon icon={faCalendarAlt} />  {this.state.date}
+                        </div>
+
                     </Card.Header>
-                    <Form onReset={this.resetLesson} onSubmit={this.state.id ? this.updateLesson : this.submitLesson}>
-                        <Card.Body>
-                            <Form.Row>
-                                <Form.Group as={Col} controlId="formGridStudent">
-                                    <Form.Label>Student</Form.Label>
-                                    <Form.Control required as="select"
-                                        name="student"
-                                        value={student}
-                                        onChange={this.lessonChange}
-                                        className={"bg-dark text-white"} >
-                                        {this.state.students.map(student =>
-                                            <option key={student.id} value={JSON.stringify(student)}>
-                                                {student.lastName + " " + student.firstName}
-                                            </option>
-                                        )}
-                                    </Form.Control>
-                                </Form.Group>
+                    <Card.Body>
+                        <Table striped bordered hover variant="dark">
+                            <thead>
+                                <tr>
+                                    <th>Instructor</th>
+                                    <th>9:00</th>
+                                    <th>10:00</th>
+                                    <th>11:00</th>
+                                    <th>12:00</th>
+                                    <th>13:00</th>
+                                    <th>14:00</th>
+                                    <th>15:00</th>
+                                    <th>16:00</th>
+                                    <th>17:00</th>
+                                    <th>18:00</th>
+                                    <th>19:00</th>
+                                    <th>20:00</th>
 
-                                <Form.Group as={Col} controlId="formGridInstructor">
-                                    <Form.Label>Instructor</Form.Label>
-                                    <Form.Control required as="select"
-                                        autoComplete="off"
-                                        name="instructor"
-                                        value={instructor}
-                                        onChange={this.lessonChangeInstructor}
-                                        className={"bg-dark text-white"} >
-                                        {this.state.instructors.filter((item, index) => this.state.instructors.indexOf(item) === index)
-                                            .map(instructor =>
-                                                <option key={instructor.id} value={JSON.stringify(instructor)}>
-                                                    {instructor.lastName + " " + instructor.firstName}
+                                </tr>
+                            </thead>
 
-                                                </option>
-                                            )}
-                                    </Form.Control>
-                                </Form.Group>
-                            </Form.Row>
-
-                            <Form.Row>
-                                <Form.Group as={Col} controlId="formGridDate">
-                                    <Form.Label>Date [dd-mm-yyyy]</Form.Label>
-                                    <Form.Control required as="select"
-                                        autoComplete="off"
-                                        name="date"
-                                        value={date}
-                                        onChange={this.lessonChange}
-                                        className={"bg-dark text-white"}
-                                        placeholder="Select Date">
-                                        {this.state.dates.map(date =>
-                                            <option key={date} value={date}>
-                                                {date}
-                                            </option>
-                                        )}
-                                    </Form.Control>
-                                </Form.Group>
-
-                                <Form.Group as={Col} controlId="formGridTime">
-                                    <Form.Label>Time</Form.Label>
-                                    <Form.Control required as="select"
-                                        autoComplete="off"
-                                        name="time"
-                                        value={time}
-                                        onChange={this.lessonChange}
-                                        className={"bg-dark text-white"} >
-                                        {this.state.times.map(time =>
-                                            <option key={time} value={time}>
-                                                {time}
-                                            </option>
-                                        )}
-                                    </Form.Control>
-                                </Form.Group>
-                            </Form.Row>
-
-                            <Form.Row>
-                                <Form.Group as={Col} controlId="formGridHowLong">
-                                    <Form.Label>How Long [h]</Form.Label>
-                                    <Form.Control required as="select"
-                                        autoComplete="off"
-                                        name="howLong"
-                                        value={howLong}
-                                        onChange={this.lessonChange}
-                                        className={"bg-dark text-white"}>
-                                        {this.state.howLongTable.map(howLong =>
-                                            <option key={howLong} value={howLong}>
-                                                {howLong}
-                                            </option>
-                                        )}
-                                    </Form.Control>
-                                </Form.Group>
-
-                                <Form.Group as={Col} controlId="formGridNrStudents">
-                                    <Form.Label>Nr Of Students</Form.Label>
-                                    <Form.Control required as="select"
-                                        autoComplete="off"
-                                        name="nrStudents"
-                                        value={nrStudents}
-                                        onChange={this.lessonChange}
-                                        className={"bg-dark text-white"} >
-                                        {this.state.nrStudTable.map(nrStudents =>
-                                            <option key={nrStudents} value={nrStudents}>
-                                                {nrStudents}
-                                            </option>
-                                        )}
-                                    </Form.Control>
-                                </Form.Group>
-                            </Form.Row>
-
-                        </Card.Body>
-
-                        <Card.Footer>
-                            <div>
-                                <Button size="sm" variant="primary" type="submit">
-                                    <FontAwesomeIcon icon={faSave} /> {this.state.id ? "Update" : "Submit"}
-                                </Button>
-                                {'      '}
-
-                                <Button size="sm" variant="secondary" type="reset">
-                                    <FontAwesomeIcon icon={faUndo} />  Reset
-                    </Button>
-                            </div>
-                            {'      '}
-                            <div>
-                                <Button size="sm" variant="light" type="button" onClick={this.returnToList.bind()}>
-                                    <FontAwesomeIcon icon={faArrowLeft} />  Return
-                    </Button>
-                            </div>
-                        </Card.Footer>
-                    </Form >
+                            <tbody>
+                                
+                                    <InstructorDay instructorDay={instructorDay}
+                                        lessonStatusChange={(lesson, newStatus) => this.lessonStatusChange(lesson, newStatus)}
+                                        deleteLesson={(lesson) => this.deleteLesson(lesson)} 
+                                        changeShowForm ={() => this.changeShowForm()}/>
+                            </tbody>
 
 
-                </Card >
+                        </Table>
+                    </Card.Body>
+                    <Card.Footer>
+
+
+
+                    </Card.Footer>
+                </Card>
             </div>
+
         );
     }
 
+
 }
-export default Lesson;
+
+const mapStateToProps = state => {
+    return {
+        //savedStudentObject: state.student,
+        //      studentObject: state.student,
+        //  updatedStudent: state.student.student
+        lesson: state.lesson,
+    };
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        updateLesson: (lesson) => dispatch(updateLesson(lesson)),
+        deleteLesson: (lesson) => dispatch(deleteLesson(lesson))
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Schedule);

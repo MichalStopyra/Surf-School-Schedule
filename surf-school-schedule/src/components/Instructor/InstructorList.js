@@ -44,7 +44,7 @@ class InstructorList extends React.Component {
                 this.setState({ "show": false });
             }
         }, 1000);
-        this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection);
+        this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection, false);
 
     };
 
@@ -54,7 +54,7 @@ class InstructorList extends React.Component {
             this.searchInstructor(target)
         } else {
             let sortDirection = this.state.sortToggle ? "asc" : "desc";
-            this.props.fetchAllInstructors(target, this.state.instructorsPerPage, this.props.instructor.sortDirection);
+            this.props.fetchAllInstructors(target, this.state.instructorsPerPage, this.props.instructor.sortDirection, false);
         }
         this.setState({
             [event.target.name]: target
@@ -83,7 +83,7 @@ class InstructorList extends React.Component {
                 this.searchInstructor(this.props.instructor.currentPage)
             } else {
                 let sortDirection = this.state.sortToggle ? "asc" : "desc";
-                this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection);
+                this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection, false);
             }
         }
     };
@@ -109,7 +109,7 @@ class InstructorList extends React.Component {
                 this.searchInstructor(this.props.instructor.currentPage)
             } else {
                 let sortDirection = this.state.sortToggle ? "asc" : "desc";
-                this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection);
+                this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection, false);
             }
         }
     };
@@ -121,7 +121,7 @@ class InstructorList extends React.Component {
 
     cancelSearch = () => {
         this.props.instructor.searchedInstructor = '';
-        this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection);
+        this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection, false);
         this.forceUpdate();
     };
 
@@ -133,7 +133,7 @@ class InstructorList extends React.Component {
             this.props.instructor.sortDirection = "asc";
          //   console.log(this.props.instructor.sortDirection);
 
-        this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection);
+        this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection, false);
 
     }
 
@@ -305,7 +305,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        fetchAllInstructors: (currentPage, size, sortDir) => dispatch(fetchAllInstructors(currentPage, size, sortDir)),
+        fetchAllInstructors: (currentPage, size, sortDir, addSelect) => dispatch(fetchAllInstructors(currentPage, size, sortDir, addSelect)),
         deleteInstructor: (instructorId) => dispatch(deleteInstructor(instructorId)),
         searchInstructors: (searchedInstructor, currentPage, sizePage) => dispatch(searchInstructors(searchedInstructor, currentPage, sizePage))
     }
