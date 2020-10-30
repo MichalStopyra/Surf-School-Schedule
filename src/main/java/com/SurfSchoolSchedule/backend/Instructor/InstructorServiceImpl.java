@@ -53,15 +53,23 @@ public class InstructorServiceImpl implements InstructorService<Instructor> {
     @Transactional
     @Override
     public void deleteInstructor(long instructorId) {
-        Instructor st = instructorRepository.findById(instructorId).get();
-        instructorRepository.delete(st);
+        Instructor instr = instructorRepository.findById(instructorId).get();
+        if (instr.getLessons().isEmpty()) {
+            instructorRepository.delete(instr);
+        } else
+            throw new RuntimeException("Instructor assigned to lesson(s) - can't delete them");
     }
 
     @Transactional
     @Override
-    public void updateInstructor(Instructor instructor, long id) {
-        Instructor i = instructorRepository.findById(id).get();
-        i.setAllFormValues(instructor);
+    public Instructor updateInstructor(Instructor instructor, long id, Pageable pageable) {
+        if (instructorDoesNotExist(pageable, instructor)) {
+            Instructor i = instructorRepository.findById(id).get();
+            i.setAllFormValues(instructor);
+            return i;
+        } else {
+            throw new RuntimeException("Can't update - Instructor already in the database");
+        }
     }
 
 

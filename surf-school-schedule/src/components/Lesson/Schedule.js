@@ -33,6 +33,8 @@ class Schedule extends React.Component {
             searchedLesson: '',
             sortToggle: false,
             showForm: false,
+            lessonIndex: '',
+            instrIndex: ''
         };
         // this.getFieldColor = this.getFieldColor.bind(this);
 
@@ -169,23 +171,32 @@ class Schedule extends React.Component {
     };
 
 
-    //if close form => change showForm to hide it
+    //if close form => change showForm to hide it and update lesson list
     //if open form => get instructor and hour to pre-fill the form
-    changeShowForm = (instructor, index, refresh) => {
+    changeShowForm = (instructor, instrIndex, lessonIndex, refresh, lesson) => {
         if (this.state.showForm) {
             this.setState({
                 "showForm": !this.state.showForm,
             });
-            if (refresh)
-                this.findAllInstructorsAndSchedules(this.state.date);
+            if (refresh) {
+                let tempTab = this.state.instructorDay;
+                for (let j = 0; j < lesson.howLong; ++j)
+                    tempTab[instrIndex].lessonsThisDay[lessonIndex + j] = lesson;
+                this.setState({
+                    instructorDay: tempTab
+                });
+
+                //this.findAllInstructorsAndSchedules(this.state.date);
+            }
             return;
         }
         else {
-            index += 9;
             this.setState({
                 "showForm": !this.state.showForm,
                 "instructor": instructor,
-                "lessonHour": index + ":00"
+                "lessonHour": lessonIndex + 9 + ":00",
+                "lessonIndex": lessonIndex,
+                "instrIndex": instrIndex
             });
         }
     }
@@ -196,7 +207,9 @@ class Schedule extends React.Component {
         return (
             <div>
                 <LessonForm instructor={this.state.instructor} lessonHour={this.state.lessonHour} date={this.state.date}
-                    showForm={this.state.showForm} handleClose={(instructor, index, refresh) => this.changeShowForm(instructor, index, refresh)}></LessonForm>
+                    instrIndex={this.state.instrIndex} lessonIndex={this.state.lessonIndex}
+                    showForm={this.state.showForm} handleClose={(instructor, instrIndex, lessonIndex, refresh, lesson) =>
+                        this.changeShowForm(instructor, instrIndex, lessonIndex, refresh, lesson)}></LessonForm>
                 <Card className={"border border-dark bg-dark text-white"}>
                     <Card.Header>
                         <div style={{ "float": "left" }}>
@@ -230,7 +243,7 @@ class Schedule extends React.Component {
                                 <InstructorDay instructorDay={instructorDay}
                                     lessonStatusChange={(lesson, newStatus) => this.lessonStatusChange(lesson, newStatus)}
                                     deleteLesson={(lesson, index) => this.deleteLesson(lesson, index)}
-                                    changeShowForm={(instructor, index) => this.changeShowForm(instructor, index)} />
+                                    changeShowForm={(instructor, instrIndex, lessonIndex) => this.changeShowForm(instructor, instrIndex, lessonIndex)} />
                             </tbody>
 
 

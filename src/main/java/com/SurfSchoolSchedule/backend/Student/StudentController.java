@@ -50,8 +50,8 @@ public class StudentController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public void updateStudent(@PathVariable("id") long id, @RequestBody Student student) {
-        studentService.updateStudent(student, id);
+    public ResponseEntity<Student> updateStudent(@PathVariable("id") long id, @RequestBody Student student, Pageable pageable) {
+        return new ResponseEntity<>(studentService.updateStudent(student, id, pageable), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/list", method = RequestMethod.POST)

@@ -18,5 +18,6 @@ public interface StudentService<T> {
 
     void deleteStudent(long studentId);
 
-    void updateStudent(Student student, long id);
+    Student updateStudent(Student student, long id, Pageable pageable);
+
 }

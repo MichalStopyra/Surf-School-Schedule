@@ -34,12 +34,19 @@ public class LessonServiceImpl implements LessonService<Lesson> {
 
     @Transactional
     @Override
+    public Page<Lesson> getLessonsForInstructorAtDate(Pageable pageable, String date, Long idInstructor) {
+        return lessonRepository.findLessonsForInstructorAtDate(pageable, idInstructor, date);
+    }
+
+    @Transactional
+    @Override
     public Lesson addNewLesson(Pageable pageable, Lesson newLesson) {
-        if (lessonCanHappen(pageable, newLesson))
+        if (noLessonAtThisHour(pageable, newLesson) && noCoincidingLessonsInEarlierHours(pageable, newLesson))
             return lessonRepository.save(newLesson);
-        else
+         else
             throw new RuntimeException("No free slot at this hour");
     }
+
 
     @Transactional
     @Override
@@ -54,12 +61,38 @@ public class LessonServiceImpl implements LessonService<Lesson> {
         Lesson l = lessonRepository.findById(id).get();
         l.setAllFormValues(lesson);
     }
-    
-    private boolean lessonCanHappen(Pageable pageable, Lesson newLesson) {
-        System.out.println(newLesson.getInstructor().getId());
-        return lessonRepository.alreadyExists(pageable, newLesson.getStudent().getId(), newLesson.getInstructor().getId(),
-                newLesson.getDate(), newLesson.getTime()).isEmpty();
+
+    private boolean noLessonAtThisHour(Pageable pageable, Lesson newLesson) {
+//        return lessonRepository.alreadyExists(pageable, newLesson.getStudent().getId(), newLesson.getInstructor().getId(),
+//                newLesson.getDate(), newLesson.getTime()).isEmpty();
+        double newLessonLength = newLesson.getHowLong();
+        boolean noLessons = true;
+        for (int i = 0; i < newLessonLength; ++i) {
+            int hourInt = Integer.parseInt(newLesson.getTime().split(":")[0]);
+            hourInt+=i;
+            String hourString = Integer.toString(hourInt) + ":00";
+            if (!lessonRepository.alreadyExists(pageable, newLesson.getStudent().getId(), newLesson.getInstructor().getId(),
+                    newLesson.getDate(), hourString).isEmpty()) {
+                noLessons = false;}
+        }
+        return noLessons;
+
 
         // return lessonRepository.search(pageable, newLesson.getLesson().getFirstName().concat(" ".concat(newLesson.getLesson().getLastName())), , newLesson.getFirstName().concat(" ".concat(newLesson.getLastName()))) != null;
+    }
+//check if e.g. lesson that started two hors earlier doesn't coincide with newLesson
+    private boolean noCoincidingLessonsInEarlierHours(Pageable pageable, Lesson newLesson) {
+        boolean noLessons = true;
+        //lessons tka max 3 hours - so check 2 hours back and 1 hour back
+        for (int i = 1; i < 3; ++i) {
+            int hourInt = Integer.parseInt(newLesson.getTime().split(":")[0]);
+            hourInt-=i;
+            String hourString = Integer.toString(hourInt) + ":00";
+            double d = i;
+            if (!lessonRepository.studentDoesntHaveCoincidingLesson(pageable, newLesson.getStudent().getId(),
+                    newLesson.getDate(), hourString, d).isEmpty())
+                noLessons = false;
+        }
+        return noLessons;
     }
 }

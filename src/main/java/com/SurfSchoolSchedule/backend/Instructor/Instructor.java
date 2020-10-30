@@ -2,7 +2,9 @@ package com.SurfSchoolSchedule.backend.Instructor;
 
 import com.SurfSchoolSchedule.backend.AbstractEntity;
 import com.SurfSchoolSchedule.backend.Lesson.Lesson;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sun.istack.NotNull;
 
 import javax.persistence.*;
@@ -22,7 +24,7 @@ public class Instructor extends AbstractEntity {
     private String lastName;
 
     @Column
-    private  int nrHoursFull;
+    private int nrHoursFull;
 
     @Column
     private int nrHoursWeek;
@@ -30,7 +32,9 @@ public class Instructor extends AbstractEntity {
     @Column
     private int wageWeek;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    //mapped by????
+    @JsonIgnore
+    @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     //@JoinColumn(name ="FK_Lesson")
     private List<Lesson> lessons = new LinkedList<>();
@@ -75,10 +79,12 @@ public class Instructor extends AbstractEntity {
         this.wageWeek = wageWeek;
     }
 
+    @JsonIgnore
     public List<Lesson> getLessons() {
         return lessons;
     }
 
+    @JsonProperty
     public void setLessons(List<Lesson> lessons) {
         this.lessons = lessons;
     }

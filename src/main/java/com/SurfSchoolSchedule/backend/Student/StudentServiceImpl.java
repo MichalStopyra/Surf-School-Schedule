@@ -54,14 +54,23 @@ public class StudentServiceImpl implements StudentService<Student> {
     @Override
     public void deleteStudent(long studentId) {
         Student st = studentRepository.findById(studentId).get();
-        studentRepository.delete(st);
+        if (st.getLessons().isEmpty())
+            studentRepository.delete(st);
+        else
+            throw new RuntimeException("Student assigned to lesson(s) - can't delete them");
+
     }
 
     @Transactional
     @Override
-    public void updateStudent(Student student, long id) {
-        Student st = studentRepository.findById(id).get();
-        st.setAllFormValues(student);
+    public Student updateStudent(Student student, long id, Pageable pageable) {
+        if (studentDoesNotExist(pageable, student)) {
+            Student i = studentRepository.findById(id).get();
+            i.setAllFormValues(student);
+            return i;
+        } else {
+            throw new RuntimeException("Can't update - Student already in the database");
+        }
     }
 
 

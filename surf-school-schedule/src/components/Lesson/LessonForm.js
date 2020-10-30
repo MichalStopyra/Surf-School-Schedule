@@ -38,17 +38,9 @@ class Lesson extends React.Component {
     }
 
     componentDidMount() {
-        // //const idLesson = +this.props.match.params.id;
-
-
         this.findAllStudents(true);//musze dac booleana
-        // //this.findAllInstructors(!idLesson);
 
-        // if (idLesson) {
-        //     this.findLessonById(idLesson);
-        // }
-
-         this.setArrays();
+        this.setArrays();
     };
 
 
@@ -200,9 +192,6 @@ class Lesson extends React.Component {
 
     isValid = () => {
         if (this.state.student.lastName === 'Select Student' ||
-            this.state.instructor.lastName === 'Select Instructor' ||
-            this.state.date === 'Select Date' ||
-            this.state.time === 'Select Hour' ||
             this.state.nrStudents === 'Select Nr of Students' ||
             this.state.howLong === 'Select How Long') {
             this.setState({ "showInvalidMessage": true, "method": "post" });
@@ -214,9 +203,9 @@ class Lesson extends React.Component {
     }
 
     submitLesson = () => {
-        // if (!this.isValid()) {
-        //     return;
-        // }
+        if (!this.isValid()) {
+            return;
+        }
 
         const lesson = {
             instructor: this.props.instructor,
@@ -231,12 +220,17 @@ class Lesson extends React.Component {
         this.props.saveLesson(lesson);
         setTimeout(() => {
             if (!this.props.lesson.error) {
-                this.setState({ "show": true, "method": "post" });
-               // setTimeout(() => this.setState({ "show": false }), 3000);
-                setTimeout(() => this.props.handleClose(null, null, true), 10);
+                this.setState({
+                    "show": true,
+                    "method": "post"
+                });
+                setTimeout(() => this.setState({ "show": false }), 3000);
+                this.resetForm();
+                setTimeout(() => this.props.handleClose(null, this.props.instrIndex, this.props.lessonIndex, true, lesson), 1000);
             } else {
                 this.setState({ "showInvalidMessage": true, "method": "post" });
                 setTimeout(() => this.setState({ "showInvalidMessage": false }), 3000);
+                this.props.lesson.error='';
             }
         }, 1000);
     };
@@ -278,11 +272,12 @@ class Lesson extends React.Component {
         }, 2000);
     }
 
-    resetLesson = () => {
-        this.setState(() => this.initialState);
-        this.findAllInstructors();
-        this.findAllStudents();
-        this.setArrays();
+    resetForm = () => {
+        this.setState({
+            "student": this.initialState.student,
+            "howLong": this.initialState.howLong,
+            "nrStudents": this.initialState.nrStudents
+        });
     };
 
     lessonChange = event => {
@@ -304,6 +299,11 @@ class Lesson extends React.Component {
 
     }
 
+    resetAndCloseForm = () => {
+        this.resetForm();
+        this.props.handleClose(false);
+    }
+
     render() {
         const { student, time, howLong, nrStudents } = this.state;
         const instructors = this.props.instructor.instructors;
@@ -312,9 +312,15 @@ class Lesson extends React.Component {
         return (
             <>
                 <Modal show={this.props.showForm}
-                    onHide={() => this.props.handleClose(false)}
+                    onHide={() => this.resetAndCloseForm()}
                 >
                     <Modal.Header className={"border border-light bg-dark text-white"} closeButton>
+                        <div style={{ "display": this.state.show ? "block" : "none" }}>
+                            <SuccessToast show={this.state.show} message={this.state.method === "put" ? "Lesson Updated Successfully" : "Lesson Saved Successfully."} type="success" />
+                        </div>
+                        <div style={{ "display": this.state.showInvalidMessage ? "block" : "none" }}>
+                            <SuccessToast show={this.state.showInvalidMessage} message={"Fill out the required fields."} type="dangerNoSuccess" />
+                        </div>
                         <Modal.Title>
                             <FontAwesomeIcon icon={this.state.id ? faEdit : faPlusSquare} /> {this.state.id ? "Update Lesson" : "Add New Lesson"}
                         </Modal.Title>
@@ -332,27 +338,6 @@ class Lesson extends React.Component {
                                     <h6>Time</h6>
                                     <h5>{this.props.lessonHour}</h5>
 
-
-                                    {/* <Form.Group as={Col} controlId="formGridInstructor">
-                                            <Form.Label>Instructor</Form.Label>
-                                            <Form.Control required as="select"
-                                                autoComplete="off"
-                                                name="instructor"
-                                                value={instructor}
-                                                onChange={this.lessonChangeInstructor}
-                                                className={"bg-dark text-white"} >
-                                                {instructors.filter((item, index, self) =>
-                                                    index === self.findIndex((e) => (
-                                                        e.id === item.id)
-                                                    ))
-                                                    .map(instructor =>
-                                                        <option key={instructor.id} value={JSON.stringify(instructor)}>
-                                                            {instructor.lastName + " " + instructor.firstName}
-
-                                                        </option>
-                                                    )}
-                                            </Form.Control>
-                                        </Form.Group> */}
 
 
                                     <Form.Group as={Col} controlId="formGridStudent">
@@ -423,37 +408,20 @@ class Lesson extends React.Component {
                             </Button>
                             {'      '}
 
-                            <Button size="sm" variant="secondary" type="reset">
+                            <Button size="sm" variant="secondary" type="reset" onClick={() => this.resetForm()}>
                                 <FontAwesomeIcon icon={faUndo} />  Reset
                     </Button>
                         </div>
                         {'      '}
                         <div>
-                            <Button size="sm" variant="border border-dark bg-light" type="button" onClick={() => this.props.handleClose(false)}>
+                            <Button size="sm" variant="border border-dark bg-light" type="button" onClick={() => this.resetAndCloseForm()}>
                                 <FontAwesomeIcon icon={faArrowLeft} />  Return
                     </Button>
                         </div>
 
-                        {/* <Button variant="secondary" onClick={() => this.props.handleClose()}>
-                            Close
-          </Button>
-                        <Button variant="primary" onClick={() => this.props.handleClose()}>
-                            Save Changes
-          </Button> */}
                     </Modal.Footer>
                 </Modal>
             </>
-            // <div>
-            //     <div style={{ "display": this.state.show ? "block" : "none" }}>
-            //         <SuccessToast show={this.state.show} message={this.state.method === "put" ? "Lesson Updated Successfully" : "Lesson Saved Successfully."} type="success" />
-            //     </div>
-            //     <div style={{ "display": this.state.showInvalidMessage ? "block" : "none" }}>
-            //         <SuccessToast show={this.state.showInvalidMessage} message={"Fill out the required fields."} type="dangerNoSuccess" />
-            //     </div>
-
-
-            //    
-            //</div>
         );
     }
 

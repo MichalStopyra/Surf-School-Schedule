@@ -17,5 +17,5 @@ public interface InstructorService<T> {
 
     void deleteInstructor(long instructorId);
 
-    void updateInstructor(Instructor instructor, long id);
+    Instructor updateInstructor(Instructor instructor, long id, Pageable pageable);
 }

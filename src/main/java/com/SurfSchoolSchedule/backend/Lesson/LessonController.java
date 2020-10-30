@@ -45,6 +45,28 @@ public class LessonController {
         return lesson;
     }
 
+    @GetMapping("/{idInstructor}/{date}")
+    public ResponseEntity<Page<Lesson>> getInstructorLessonsByDate(@PathVariable("idInstructor") long idInstructor, @PathVariable("date") String date) {
+
+            //    Lesson lesson = lessonService.getLesson(idInstructor);
+//        Sort sort = Sort.by(
+//                Sort.Order.asc(date)/*,
+//                Sort.Order.asc("lastName").ignoreCase()*/
+//        );
+//        System.out.println(lessonService.getLessonsForInstructorAtDate(
+//                PageRequest.of(0, 999999999),
+//                date, idInstructor).getClass().getName());
+
+
+
+            return new ResponseEntity<>(
+                    lessonService.getLessonsForInstructorAtDate(
+                            PageRequest.of(0, 99999999),
+                            date, idInstructor)
+                    , HttpStatus.OK);
+        //}
+    }
+
     @RequestMapping(value = "/list", method = RequestMethod.POST)
     public ResponseEntity<Lesson> addNewLesson(@RequestBody Lesson lessonObj, Pageable pageable) {
         return new ResponseEntity<>(lessonService.addNewLesson(pageable, lessonObj), HttpStatus.CREATED);

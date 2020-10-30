@@ -12,7 +12,7 @@ public class Lesson extends AbstractEntity {
 
 
     public enum Status{
-        To_Give, Finished_Paid, Finished_Unpaid
+        To_Give, Finished_Paid, Finished_Unpaid, Not_Given
     }
 
     @NotNull

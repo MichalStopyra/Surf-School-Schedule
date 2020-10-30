@@ -27,10 +27,10 @@ public class InstructorContoller {
     public ResponseEntity<Page<Instructor>> getAll(
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "5") Integer size,
-            @RequestParam(defaultValue = "asc") String sortDir) {
+            @RequestParam(defaultValue = "desc") String sortDir) {
         Sort sort = Sort.by(
-                sortDir.equalsIgnoreCase("asc") ? (Sort.Order.asc("lastName")) : (Sort.Order.desc("lastName")),
-                Sort.Order.asc("firstName").ignoreCase()
+                sortDir.equalsIgnoreCase("desc") ? (Sort.Order.asc("firstName")) : (Sort.Order.desc("firstName")),
+                Sort.Order.asc("lastName").ignoreCase()
         );
 
         return new ResponseEntity<>(
@@ -52,9 +52,14 @@ public class InstructorContoller {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public void updateInstructor(@PathVariable("id") long id, @RequestBody Instructor instructor) {
-        instructorService.updateInstructor(instructor, id);
+    public ResponseEntity<Instructor> updateInstructor(@PathVariable("id") long id, @RequestBody Instructor instructor, Pageable pageable) {
+        return new ResponseEntity<>(instructorService.updateInstructor(instructor, id, pageable), HttpStatus.OK);
     }
+
+//    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+//    public void updateInstructor(@PathVariable("id") long id, @RequestBody Instructor instructor) {
+//        instructorService.updateInstructor(instructor, id);
+//    }
     
     @RequestMapping(value = "/list", method = RequestMethod.POST)
     public ResponseEntity<Instructor> addNewInstructor(@RequestBody Instructor instructorObj, Pageable pageable) {
