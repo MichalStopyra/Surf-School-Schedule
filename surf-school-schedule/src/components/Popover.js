@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Popover, Button, OverlayTrigger, ButtonGroup } from 'react-bootstrap';
-import { faCheck, faTimes, faUserPlus } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faTimes, faUserPlus, faEdit} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
 
@@ -16,7 +16,7 @@ export default class SuccessToast extends React.Component {
         //     zIndex: '1',
         //     boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)'
         // };
-        if (this.props.data) {
+        if (this.props.data && this.props.isNotInFuture) {
             return (
                 <>
 
@@ -26,11 +26,14 @@ export default class SuccessToast extends React.Component {
                         key="right"
                         placement="right"
                         overlay={
-                            <Popover id={`popover-positioned-right`}>
+                            <Popover {...this.props} id={`popover-positioned-right`}>
                                 <Popover.Title className={"border border-dark bg-dark text-white"} as="h3">Actions</Popover.Title>
                                 <Popover.Content className={"border border-dark bg-light text-white"}>
                                     <Button size="sm" variant="outline-info" type="button" onClick={() => { this.props.lessonStatusChange() }}>
                                         <FontAwesomeIcon icon={faCheck} />
+                                    </Button>
+                                    <Button size="sm" variant="outline-dark" type="button" onClick={() => { this.props.editLesson() }}>
+                                        <FontAwesomeIcon icon={faEdit} />
                                     </Button>
                                     <Button size="sm" variant="outline-danger" type="button" onClick={() => { this.props.deleteLesson() }}>
                                         <FontAwesomeIcon icon={faTimes} />
@@ -41,7 +44,38 @@ export default class SuccessToast extends React.Component {
                         }
                     >
 
-                        <Button variant={this.props.buttonColor} >{this.props.data}</Button>
+                        <Button size ="sm" variant={this.props.buttonColor} >{this.props.data}</Button>
+                    </OverlayTrigger>
+
+                </>
+            );
+        }
+        else if (this.props.data && !this.props.isNotInFuture) {
+            return (
+                <>
+
+                    <OverlayTrigger
+                    trigger = "focus"
+                        //showPopover={this.props.showPopover}
+                        key="right"
+                        placement="right-start"
+                        overlay={
+                            <Popover id={`popover-positioned-right`}>
+                                <Popover.Title className={"border border-dark bg-dark text-white"} as="h3">Actions</Popover.Title>
+                                <Popover.Content className={"border border-dark bg-light text-white"}>
+                                    <Button size="sm" variant="outline-dark" type="button" onClick={() => { this.props.editLesson() }}>
+                                        <FontAwesomeIcon icon={faEdit} />
+                                    </Button>
+                                    <Button size="sm" variant="outline-danger" type="button" onClick={() => { this.props.deleteLesson() }}>
+                                        <FontAwesomeIcon icon={faTimes} />
+                                    </Button>
+
+                                </Popover.Content>
+                            </Popover>
+                        }
+                    >
+
+                        <Button size ="sm" variant={this.props.buttonColor} >{this.props.data}</Button>
                     </OverlayTrigger>
 
                 </>

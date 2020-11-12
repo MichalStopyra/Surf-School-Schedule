@@ -15,7 +15,8 @@ public interface LessonService <T> {
 
     void deleteLesson(long lessonId);
 
-    void updateLesson(Lesson lesson, long id);
+    void updateLesson(Pageable pageable, Lesson lesson, long id);
 
     public Page<T>  getLessonsForInstructorAtDate(Pageable pageable, String date, Long idInstructor);
+    public Page<T> getAllStudentLessons(Pageable pageable, Long idStudent);
 }

@@ -1,7 +1,7 @@
 import {
     SAVE_LESSON_REQUEST, FETCH_LESSON_REQUEST, UPDATE_LESSON_REQUEST, DELETE_LESSON_REQUEST,
     FETCH_ALL_LESSONS_REQUEST, FETCH_SEARCH_LESSONS_REQUEST,
-    LESSON_SUCCESS, LESSON_FAILURE
+    LESSON_SUCCESS, LESSON_FAILURE, FETCH_ALL_STUDENT_LESSONS_REQUEST 
 } from "./lessonTypes";
 
 const initialState = {
@@ -71,6 +71,14 @@ const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 lessons: action.lessons,
+                error: ''
+            };
+        case FETCH_ALL_STUDENT_LESSONS_REQUEST:
+            return {
+                ...state,
+                lessons: action.payload,
+                totalElements: action.totalElements,
+                totalPages: action.totalPages,
                 error: ''
             };
         default: 

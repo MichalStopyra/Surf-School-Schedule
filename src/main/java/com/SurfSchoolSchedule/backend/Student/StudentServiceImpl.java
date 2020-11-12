@@ -1,5 +1,6 @@
 package com.SurfSchoolSchedule.backend.Student;
 
+import com.SurfSchoolSchedule.backend.Lesson.LessonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -7,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Service
 public class StudentServiceImpl implements StudentService<Student> {
@@ -15,16 +17,39 @@ public class StudentServiceImpl implements StudentService<Student> {
     @Autowired
     StudentRepository studentRepository;
 
+    @Autowired
+    LessonRepository lessonRepository;
+
     @Transactional
     @Override
     public Page<Student> getAll(Pageable pageable) {
-        return studentRepository.findAll(pageable);
+        Page<Student> allElementsPage = studentRepository.findAll(pageable);
+        List<Student> allElementsList = allElementsPage.getContent();
+
+        for (Student student : allElementsList) {
+            setNrOfLessonsForStudent(student.getId());
+        }
+        //return studentRepository.findAll(pageable);
+         return allElementsPage;
+    }
+
+
+    //update nr of lessons for specific student as well
+    @Transactional
+    @Override
+    public Iterable<Student> getAll(Sort sort) {
+
+
+        return studentRepository.findAll(sort);
     }
 
     @Transactional
     @Override
-    public Iterable<Student> getAll(Sort sort) {
-        return studentRepository.findAll(sort);
+    public void setNrOfLessonsForStudent(long idStudent) {
+        Student st = studentRepository.findById(idStudent).get();
+        st.setLessonHours(lessonRepository.countLessonHours(idStudent));
+        // st.setMoneyOwing(lessonRepository.countmoneyOwing);
+        st.setUnpaidLessons(lessonRepository.countUnpaidLessons(idStudent));
     }
 
     @Transactional
@@ -64,13 +89,18 @@ public class StudentServiceImpl implements StudentService<Student> {
     @Transactional
     @Override
     public Student updateStudent(Student student, long id, Pageable pageable) {
-        if (studentDoesNotExist(pageable, student)) {
+        if (otherStudentWithThisNameDoesNotExist(pageable, student)) {
             Student i = studentRepository.findById(id).get();
             i.setAllFormValues(student);
             return i;
         } else {
             throw new RuntimeException("Can't update - Student already in the database");
         }
+    }
+
+    private boolean otherStudentWithThisNameDoesNotExist(Pageable pageable, Student updatedStudent) {
+        return studentRepository.otherStudentWithThisName(pageable, updatedStudent.getId(), updatedStudent.getFirstName().concat(" ".concat(updatedStudent.getLastName()))).isEmpty();
+
     }
 
 

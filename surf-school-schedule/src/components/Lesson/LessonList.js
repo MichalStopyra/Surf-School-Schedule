@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Card, Table, ButtonGroup, Button, InputGroup, FormControl } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUsers, faWallet, faEdit, faTrash, faUserPlus, faStepBackward, faFastBackward, faStepForward, faFastForward, faSearch, faTimes, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
+import { faUsers, faWallet, faEdit, faTrash, faCalendarPlus, faStepBackward, faFastBackward, faStepForward, faFastForward, faSearch, faTimes, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
 import SuccessToast from '../SuccessToast';
 
 import { connect } from 'react-redux';
@@ -272,7 +272,7 @@ class LessonList extends React.Component {
                         <div style={{ "float": "left" }}>
                             <Link to={"add-lesson"} className="nav-link">
                                 <ButtonGroup>
-                                    <Button size="lg" variant="outline-light"> <FontAwesomeIcon icon={faUserPlus} /> </Button>
+                                    <Button size="lg" variant="outline-light"> <FontAwesomeIcon icon={faCalendarPlus} /> </Button>
                                 </ButtonGroup>
                             </Link>
                             Page {currentPage} of {totalPages === 0 ? 1 : totalPages}

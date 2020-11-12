@@ -19,7 +19,7 @@ class Lesson extends React.Component {
         this.state = this.initialState;
         this.state.show = false;
         this.state.showInvalidMessage = false;
-
+        this.state.showCantCreateLessonMessage = false;
         this.state.method = 'post';
         this.lessonChange = this.lessonChange.bind(this);
         this.submitLesson = this.submitLesson.bind(this);
@@ -38,8 +38,10 @@ class Lesson extends React.Component {
     }
 
     componentDidMount() {
-        this.findAllStudents(true);//musze dac booleana
-
+        let selectStudent = {
+            id: -1, lastName: 'Select Student', firstName: '', idCardNr: '', telNr: '', paymentStatus: 0, lessonHours: 0, unpaidLessons: 0, moneyOwing: 0, moneyInAdvance: ''
+        };
+        this.findAllStudents(selectStudent);
         this.setArrays();
     };
 
@@ -154,8 +156,8 @@ class Lesson extends React.Component {
     }
 
 
-    findAllStudents = (addSelect) => {
-        this.props.fetchAllStudents(1, 999999999, "asc", addSelect);
+    findAllStudents = (addedStudent) => {
+        this.props.fetchAllStudents(1, 999999999, "asc", addedStudent);
     }
 
 
@@ -228,16 +230,15 @@ class Lesson extends React.Component {
                 this.resetForm();
                 setTimeout(() => this.props.handleClose(null, this.props.instrIndex, this.props.lessonIndex, true, lesson), 1000);
             } else {
-                this.setState({ "showInvalidMessage": true, "method": "post" });
-                setTimeout(() => this.setState({ "showInvalidMessage": false }), 3000);
-                this.props.lesson.error='';
+                this.setState({ "showCantCreateLessonMessage": true, "method": "post" });
+                setTimeout(() => this.setState({ "showCantCreateLessonMessage": false }), 3000);
+                this.props.lesson.error = '';
             }
         }, 1000);
     };
 
 
-    updateLesson = event => {
-        event.preventDefault();
+    updateLesson = () => {
         if (!this.isValid()) {
             return;
         }
@@ -259,20 +260,27 @@ class Lesson extends React.Component {
         };
 
         this.props.updateLesson(lesson);
+//        this.forceUpdate();//?????????????????????????
         setTimeout(() => {
 
-            if (!this.props.student.error) {
+            if (!this.props.lesson.error) {
                 this.setState({ "show": true, "method": "put" });
                 setTimeout(() => this.setState({ "show": false }), 3000);
-                setTimeout(() => this.returnToList(), 1000);
+                this.resetForm();
+                setTimeout(() => this.props.handleClose(null, this.props.instrIndex, this.props.lessonIndex, null, lesson, true), 1000);
             } else {
-                this.setState({ "showInvalidMessage": true, "method": "post" });
-                setTimeout(() => this.setState({ "showInvalidMessage": false }), 3000);
+                this.setState({ "showCantCreateLessonMessage": true, "method": "put" });
+                setTimeout(() => this.setState({ "showCantCreateLessonMessage": false }), 3000);
+                this.props.lesson.error = '';
             }
         }, 2000);
     }
 
     resetForm = () => {
+        let selectStudent = {
+            id: -1, lastName: 'Select Student', firstName: '', idCardNr: '', telNr: '', paymentStatus: 0, lessonHours: 0, unpaidLessons: 0, moneyOwing: 0, moneyInAdvance: ''
+        };
+        this.findAllStudents(selectStudent);
         this.setState({
             "student": this.initialState.student,
             "howLong": this.initialState.howLong,
@@ -299,9 +307,28 @@ class Lesson extends React.Component {
 
     }
 
+    onShowHandle = () => {
+
+        if (this.props.editedLesson) {
+            this.setState({
+                id: this.props.editedLesson.id,
+                student: this.props.editedLesson.student,
+                howLong: this.props.editedLesson.howLong,
+                nrStudents: this.props.editedLesson.nrStudents,
+                instructor: this.props.editedLesson.instructor,
+                date: this.props.editedLesson.date,
+                time: this.props.editedLesson.time,
+                status: this.props.editedLesson.status,
+            });
+            this.findAllStudents(this.props.editedLesson.student);//musze dac booleana
+            this.props.student.students[0] = this.props.editedLesson.student;
+
+        }
+    }
+
     resetAndCloseForm = () => {
         this.resetForm();
-        this.props.handleClose(false);
+        this.props.handleClose(false/*, null, null, null, null, true*/);
     }
 
     render() {
@@ -313,6 +340,7 @@ class Lesson extends React.Component {
             <>
                 <Modal show={this.props.showForm}
                     onHide={() => this.resetAndCloseForm()}
+                    onShow={() => this.onShowHandle()}
                 >
                     <Modal.Header className={"border border-light bg-dark text-white"} closeButton>
                         <div style={{ "display": this.state.show ? "block" : "none" }}>
@@ -321,13 +349,16 @@ class Lesson extends React.Component {
                         <div style={{ "display": this.state.showInvalidMessage ? "block" : "none" }}>
                             <SuccessToast show={this.state.showInvalidMessage} message={"Fill out the required fields."} type="dangerNoSuccess" />
                         </div>
+                        <div style={{ "display": this.state.showCantCreateLessonMessage ? "block" : "none" }}>
+                            <SuccessToast show={this.state.showCantCreateLessonMessage} message={"Can't create such lesson - conflict with other lesson"} type="dangerNoSuccess" />
+                        </div>
                         <Modal.Title>
-                            <FontAwesomeIcon icon={this.state.id ? faEdit : faPlusSquare} /> {this.state.id ? "Update Lesson" : "Add New Lesson"}
+                            <FontAwesomeIcon icon={this.props.editedLesson ? faEdit : faPlusSquare} /> {this.props.editedLesson ? "Update Lesson" : "Add New Lesson"}
                         </Modal.Title>
                     </Modal.Header>
                     <Modal.Body className={"border border-light bg-dark text-white"}>
                         <Card className={"border border-dark bg-dark text-white"}>
-                            <Form onReset={this.resetLesson} onSubmit={this.state.id ? this.updateLesson : this.submitLesson}>
+                            <Form onReset={this.resetLesson} onSubmit={this.props.editedLesson ? this.updateLesson : this.submitLesson}>
                                 <Card.Body>
                                     <h6>Instructor</h6>
                                     <h5>{this.props.instructor.firstName + " " + this.props.instructor.lastName}</h5>
@@ -403,14 +434,15 @@ class Lesson extends React.Component {
                     </Modal.Body>
                     <Modal.Footer className={"border border-light bg-light text-white"}>
                         <div>
-                            <Button size="sm" variant="info" type="submit" onClick={this.state.id ? () => this.updateLesson() : () => this.submitLesson()}>
-                                <FontAwesomeIcon icon={faSave} /> {this.state.id ? "Update" : "Submit"}
+                            <Button size="sm" variant="info" type="submit" onClick={this.props.editedLesson ? () => this.updateLesson() : () => this.submitLesson()}>
+                                <FontAwesomeIcon icon={faSave} /> {this.props.editedLesson ? "Update" : "Submit"}
                             </Button>
                             {'      '}
-
-                            <Button size="sm" variant="secondary" type="reset" onClick={() => this.resetForm()}>
-                                <FontAwesomeIcon icon={faUndo} />  Reset
-                    </Button>
+                            {!this.props.editedLesson ?
+                                <Button size="sm" variant="secondary" type="reset" onClick={() => this.resetForm()}>
+                                    <FontAwesomeIcon icon={faUndo} />  Reset
+                    </Button> : " "
+                            }
                         </div>
                         {'      '}
                         <div>
@@ -438,7 +470,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        fetchAllStudents: (currentPage, size, sortDir, addSelect) => dispatch(fetchAllStudents(currentPage, size, sortDir, addSelect)),
+        fetchAllStudents: (currentPage, size, sortDir, addedStudent) => dispatch(fetchAllStudents(currentPage, size, sortDir, addedStudent)),
         fetchAllInstructors: (currentPage, size, sortDir, addSelect) => dispatch(fetchAllInstructors(currentPage, size, sortDir, addSelect)),
         saveLesson: (lesson) => dispatch(saveLesson(lesson)),
         fetchLesson: (lessonId) => dispatch(fetchLesson(lessonId)),

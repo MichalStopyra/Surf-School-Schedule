@@ -38,6 +38,13 @@ public class LessonServiceImpl implements LessonService<Lesson> {
         return lessonRepository.findLessonsForInstructorAtDate(pageable, idInstructor, date);
     }
 
+    @Override
+    public Page<Lesson> getAllStudentLessons(Pageable pageable, Long idStudent) {
+        return lessonRepository.getAllStudentLessons(pageable, idStudent);
+    }
+
+
+
     @Transactional
     @Override
     public Lesson addNewLesson(Pageable pageable, Lesson newLesson) {
@@ -57,12 +64,17 @@ public class LessonServiceImpl implements LessonService<Lesson> {
 
     @Transactional
     @Override
-    public void updateLesson(Lesson lesson, long id) {
-        Lesson l = lessonRepository.findById(id).get();
-        l.setAllFormValues(lesson);
+    public void updateLesson(Pageable pageable, Lesson lesson, long id) {
+        if (noLessonAtThisHour(pageable, lesson) && noCoincidingLessonsInEarlierHours(pageable, lesson)) {
+            Lesson l = lessonRepository.findById(id).get();
+            l.setAllFormValues(lesson);
+        }
+        else
+            throw new RuntimeException("Can't update lesson - no free slot");
+
     }
 
-    private boolean noLessonAtThisHour(Pageable pageable, Lesson newLesson) {
+    private boolean noLessonAtThisHour(Pageable pageable, Lesson newLesson/*, boolean hasId*/) {
 //        return lessonRepository.alreadyExists(pageable, newLesson.getStudent().getId(), newLesson.getInstructor().getId(),
 //                newLesson.getDate(), newLesson.getTime()).isEmpty();
         double newLessonLength = newLesson.getHowLong();
@@ -71,10 +83,14 @@ public class LessonServiceImpl implements LessonService<Lesson> {
             int hourInt = Integer.parseInt(newLesson.getTime().split(":")[0]);
             hourInt+=i;
             String hourString = Integer.toString(hourInt) + ":00";
+          //  if(hasId){
             if (!lessonRepository.alreadyExists(pageable, newLesson.getStudent().getId(), newLesson.getInstructor().getId(),
-                    newLesson.getDate(), hourString).isEmpty()) {
+                    newLesson.getDate(), hourString, newLesson.getId()).isEmpty()) {
+                System.out.println(newLesson.getId());
+
                 noLessons = false;}
         }
+
         return noLessons;
 
 

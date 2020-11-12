@@ -108,7 +108,7 @@ class Lesson extends React.Component {
         this.state.howLongTable.push('Select How Long');
         this.state.nrStudTable.push('Select Nr of Students');
         this.setState({
-            dates: this.state.dates.concat(this.getDateArray(new Date(), this.addDays(new Date(), 7))),
+            dates: this.state.dates.concat(this.getDateArray(new Date(), this.addDays(new Date(), 14))),
             times: this.state.times.concat(this.arrayWithHours()),
             howLongTable: this.state.howLongTable.concat(this.getHowLongArray()),
             nrStudTable: this.state.nrStudTable.concat(this.getNrStudArray())
@@ -163,14 +163,21 @@ class Lesson extends React.Component {
 
 
     findAllStudents = (addSelect) => {
-        this.props.fetchAllStudents(1, 999999999, "asc", addSelect);
+        if (addSelect) {
+            let selectStudent = {
+                id: -1, lastName: 'Select Student', firstName: '', idCardNr: '', telNr: '', paymentStatus: 0, lessonHours: 0, unpaidLessons: 0, moneyOwing: 0, moneyInAdvance: ''
+            };
+            this.props.fetchAllStudents(1, 999999999, "asc", selectStudent);
+        }
+        else
+            this.props.fetchAllStudents(1, 999999999, "asc", null);
     }
 
 
 
     findAllInstructors = (addSelect) => {
         this.props.fetchAllInstructors(1, 999999999, "asc", addSelect);
-     
+
     };
 
 
@@ -232,16 +239,16 @@ class Lesson extends React.Component {
             status: this.state.status
         };
         this.props.saveLesson(lesson);
-            setTimeout(() => {
-                if (!this.props.lesson.error) {
-                    this.setState({ "show": true, "method": "post" });
-                    setTimeout(() => this.setState({ "show": false }), 3000);
-                    setTimeout(() => this.returnToList(), 1000);
-                } else {
-                    this.setState({ "showInvalidMessage": true, "method": "post" });
-                    setTimeout(() => this.setState({ "showInvalidMessage": false }), 3000);
-                }
-            }, 1000);
+        setTimeout(() => {
+            if (!this.props.lesson.error) {
+                this.setState({ "show": true, "method": "post" });
+                setTimeout(() => this.setState({ "show": false }), 3000);
+                setTimeout(() => this.returnToList(), 1000);
+            } else {
+                this.setState({ "showInvalidMessage": true, "method": "post" });
+                setTimeout(() => this.setState({ "showInvalidMessage": false }), 3000);
+            }
+        }, 1000);
     };
 
 

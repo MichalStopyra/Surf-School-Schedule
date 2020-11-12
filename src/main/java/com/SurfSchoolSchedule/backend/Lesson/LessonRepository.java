@@ -8,17 +8,12 @@ import org.springframework.data.repository.query.Param;
 
 public interface LessonRepository extends PagingAndSortingRepository<Lesson, Long> {
 
-    @Query("SELECT COUNT(l.id) FROM Lesson l WHERE l.student = :studentID")
-    int countStudentLessons(@Param("studentID") Long studentID);
-
-    @Query("SELECT COUNT(l.id) FROM Lesson l WHERE l.student = :studentID AND lower (l.status) like 'finished_unpaid'")
-    int countUnpaidStudentLessons(@Param("studentID") Long studentID);
-
     @Query("select l from Lesson l " +
             "where l.date like :lessonDate and l.time like :lessonTime " +
-            "and (l.instructor.id = :instructorId or l.student.id = :studentId)")
+            "and (l.instructor.id = :instructorId or l.student.id = :studentId) " +
+            "and l.id != nvl(:lessonId, -1)")
     Page<Lesson> alreadyExists(Pageable pageable, @Param("studentId") Long studentId, @Param("instructorId") Long instructorId,
-                               @Param("lessonDate") String lessonDate, @Param("lessonTime") String lessonTime);
+                               @Param("lessonDate") String lessonDate, @Param("lessonTime") String lessonTime, @Param("lessonId") Long lessonId);
     @Query("select l from Lesson l " +
             "where l.date like :lessonDate and l.time like :lessonTime " +
             "and l.student.id = :studentId and l.howLong > :howLongToCoincide")
@@ -30,4 +25,13 @@ public interface LessonRepository extends PagingAndSortingRepository<Lesson, Lon
             "where l.date like :lessonDate and l.instructor.id = :idInstructor")
     Page<Lesson> findLessonsForInstructorAtDate(Pageable pageable, @Param("idInstructor") Long idInstructor, @Param("lessonDate") String lessonDate);
 
+    @Query("select l from Lesson l " +
+            "where l.student.id = :idStudent")
+    Page<Lesson> getAllStudentLessons(Pageable pageable, @Param("idStudent") Long idStudent);
+
+    @Query("SELECT COALESCE(SUM(l.howLong), 0) FROM Lesson l WHERE l.student.id = :idStudent AND lower (l.status) like 'finished_unpaid'")
+    Integer countUnpaidLessons( @Param("idStudent") Long idStudent);
+
+    @Query("SELECT COALESCE(SUM(l.howLong), 0) FROM Lesson l WHERE l.student.id = :idStudent AND LOWER (l.status) NOT LIKE 'not_given' AND LOWER (l.status) NOT LIKE 'to_give' ")
+    Integer countLessonHours(@Param("idStudent") Long idStudent);
 }

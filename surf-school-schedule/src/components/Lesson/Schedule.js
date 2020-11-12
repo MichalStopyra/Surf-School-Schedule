@@ -1,9 +1,11 @@
 import React from 'react';
 
 import axios from 'axios';
+import { Link } from 'react-router-dom';
+
 import { Card, Table, ButtonGroup, Button, InputGroup, FormControl } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt, faTimes , faArrowLeft, faArrowRight, faCalendarPlus} from '@fortawesome/free-solid-svg-icons';
 import SuccessToast from '../SuccessToast';
 import Popover from '../Popover';
 import InstructorDay from './InstructorDay';
@@ -23,6 +25,7 @@ class Schedule extends React.Component {
         let today = new Date();
         this.state = {
             date: today.getMonth() + 1 + '-' + today.getDate() + '-' + today.getFullYear(),
+            dayName: today.toLocaleString('en-us', {weekday: 'long'}),
             instructor: 'khjghgxchgvjh',
             lessonHour: '',
             instructors: [],
@@ -34,7 +37,8 @@ class Schedule extends React.Component {
             sortToggle: false,
             showForm: false,
             lessonIndex: '',
-            instrIndex: ''
+            instrIndex: '',
+            editedLesson: ''
         };
         // this.getFieldColor = this.getFieldColor.bind(this);
 
@@ -151,7 +155,6 @@ class Schedule extends React.Component {
             return;
         lesson.status = newStatus;
 
-        console.log(lesson);
         this.props.updateLesson(lesson);
     };
 
@@ -159,7 +162,10 @@ class Schedule extends React.Component {
         if (!lesson)
             return;
         let i = this.state.instructorDay[index].lessonsThisDay.indexOf(lesson);
+        console.log(this.props);
         this.props.deleteLesson(lesson.id);
+
+        console.log(this.props);
 
         let tempTab = this.state.instructorDay;
         for (let j = 0; j < lesson.howLong; ++j)
@@ -173,19 +179,45 @@ class Schedule extends React.Component {
 
     //if close form => change showForm to hide it and update lesson list
     //if open form => get instructor and hour to pre-fill the form
-    changeShowForm = (instructor, instrIndex, lessonIndex, refresh, lesson) => {
+    changeShowForm = (instructor, instrIndex, lessonIndex, newLessonWasAdded, lesson, isUpdated) => {
         if (this.state.showForm) {
             this.setState({
                 "showForm": !this.state.showForm,
+                editedLesson: null
+
             });
-            if (refresh) {
+            //if time of the lesson was changed - update schedule fields
+            if (isUpdated) {
+                let tempTab = this.state.instructorDay;
+                for (let j = 0; j < 3; ++j) {
+                    if (lesson.howLong > j)
+                        tempTab[instrIndex].lessonsThisDay[lessonIndex + j] = lesson;
+                    else
+                        tempTab[instrIndex].lessonsThisDay[lessonIndex + j] = null;
+                }
+                this.setState({
+                    instructorDay: tempTab
+                });
+
+                //this.findAllInstructorsAndSchedules(this.state.date);
+                return;
+            }
+            if (newLessonWasAdded) {
+                //added lesson doesn't have id so i need to get it from data base
+                axios.get("http://localhost:8080/lesson-api/" + lesson.instructor.id + "/" + lesson.date + "?page=0&size=1&sortBy=id&sortDir=desc")
+                    .then(response => {
+                        lesson.id = response.data.content[0].id;
+                    })
+                    .catch(error => {
+                        console.error("error: " + error)
+                    });
+
                 let tempTab = this.state.instructorDay;
                 for (let j = 0; j < lesson.howLong; ++j)
                     tempTab[instrIndex].lessonsThisDay[lessonIndex + j] = lesson;
                 this.setState({
                     instructorDay: tempTab
                 });
-
                 //this.findAllInstructorsAndSchedules(this.state.date);
             }
             return;
@@ -202,18 +234,56 @@ class Schedule extends React.Component {
     }
 
 
+    editLesson = (editedLesson, instrIndex, lessonIndex) => {
+        this.setState({
+            "editedLesson": editedLesson,
+            "showForm": true,
+            "instructor": editedLesson.instructor,
+            "lessonHour": editedLesson.time,
+            "lessonIndex": lessonIndex,
+            "instrIndex": instrIndex
+        });
+
+
+    }
+
+    changeDate = (addedDays) => { 
+        let targetDay = new Date(this.state.date);
+        targetDay.setDate(targetDay.getDate() + addedDays);
+
+        this.setState({
+            date: targetDay.getMonth() + 1 + '-' + targetDay.getDate() + '-' + targetDay.getFullYear(),
+            dayName: targetDay.toLocaleString('en-us', {weekday: 'long'})
+        });
+        setTimeout(() =>         this.findAllInstructorsAndSchedules(this.state.date)
+        , 10);
+
+    }
+
     render() {
         const { instructorDay, instructors } = this.state;
         return (
             <div>
                 <LessonForm instructor={this.state.instructor} lessonHour={this.state.lessonHour} date={this.state.date}
                     instrIndex={this.state.instrIndex} lessonIndex={this.state.lessonIndex}
-                    showForm={this.state.showForm} handleClose={(instructor, instrIndex, lessonIndex, refresh, lesson) =>
-                        this.changeShowForm(instructor, instrIndex, lessonIndex, refresh, lesson)}></LessonForm>
+                    editedLesson={this.state.editedLesson}
+                    showForm={this.state.showForm} handleClose={(instructor, instrIndex, lessonIndex, refresh, lesson, isUdpated) =>
+                        this.changeShowForm(instructor, instrIndex, lessonIndex, refresh, lesson, isUdpated)} ></LessonForm>
                 <Card className={"border border-dark bg-dark text-white"}>
                     <Card.Header>
-                        <div style={{ "float": "left" }}>
-                            <FontAwesomeIcon icon={faCalendarAlt} />  {this.state.date}
+                        <div id="container" style={{"clear":"both", "display": "flex", "justifyContent":"space-between"}}>
+                        <div style={{ "textAlign": "center"}} >
+                        <Button variant="outline-light" onClick={(addedDays)=>this.changeDate(-1)} > <FontAwesomeIcon icon={faArrowLeft} /> </Button>{'  '}
+                            <FontAwesomeIcon icon={faCalendarAlt} />   {this.state.dayName} {this.state.date}{' '}
+                            <Button variant="outline-light" onClick={(addedDays)=>this.changeDate(1)}  > <FontAwesomeIcon icon={faArrowRight} /> </Button>
+                        </div>
+                        <div style={{ "textAlign": "right"}}>
+                        <Link to={"add-lesson"} className="nav-link">
+                                <ButtonGroup>
+                                    <Button size="lg" variant="outline-light"> <FontAwesomeIcon icon={faCalendarPlus} /> </Button>
+                                </ButtonGroup>
+                            </Link>
+                        </div>
                         </div>
 
                     </Card.Header>
@@ -243,7 +313,8 @@ class Schedule extends React.Component {
                                 <InstructorDay instructorDay={instructorDay}
                                     lessonStatusChange={(lesson, newStatus) => this.lessonStatusChange(lesson, newStatus)}
                                     deleteLesson={(lesson, index) => this.deleteLesson(lesson, index)}
-                                    changeShowForm={(instructor, instrIndex, lessonIndex) => this.changeShowForm(instructor, instrIndex, lessonIndex)} />
+                                    changeShowForm={(instructor, instrIndex, lessonIndex, refresh, lesson, updated) => this.changeShowForm(instructor, instrIndex, lessonIndex, refresh, lesson, updated)}
+                                    editLesson={(editedLesson, instrIndex, lessonIndex) => this.editLesson(editedLesson, instrIndex, lessonIndex)} />
                             </tbody>
 
 

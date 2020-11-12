@@ -27,7 +27,7 @@ class StudentList extends React.Component {
 
 
     componentDidMount() {
-        this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, false);
+        this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, null);
     }
 
     deleteStudent = (idStudent) => {
@@ -43,7 +43,7 @@ class StudentList extends React.Component {
                 this.setState({ "show": false });
             }
         }, 1000);
-        this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, false);
+        this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, null);
 
     };
 
@@ -53,7 +53,7 @@ class StudentList extends React.Component {
             this.searchStudent(target)
         } else {
             let sortDirection = this.state.sortToggle ? "asc" : "desc";
-            this.props.fetchAllStudents(target, this.state.studentsPerPage, this.props.student.sortDirection, false);
+            this.props.fetchAllStudents(target, this.state.studentsPerPage, this.props.student.sortDirection, null);
         }
         this.setState({
             [event.target.name]: target
@@ -70,7 +70,7 @@ class StudentList extends React.Component {
                 this.searchStudent(this.props.student.currentPage)
             } else {
                 let sortDirection = this.state.sortToggle ? "asc" : "desc";
-                this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, false);
+                this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, null);
             }
         }
     };
@@ -82,7 +82,7 @@ class StudentList extends React.Component {
                 this.searchStudent(this.props.student.currentPage)
             } else {
                 let sortDirection = this.state.sortToggle ? "asc" : "desc";
-                this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, false);
+                this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, null);
             }
         }
     };
@@ -95,7 +95,7 @@ class StudentList extends React.Component {
             if (this.props.student.searchedStudent) {
                 this.searchStudent(this.props.student.currentPage)
             } else {
-                this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, false);
+                this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, null);
             }
         }
     };
@@ -108,7 +108,7 @@ class StudentList extends React.Component {
                 this.searchStudent(this.props.student.currentPage)
             } else {
                 let sortDirection = this.state.sortToggle ? "asc" : "desc";
-                this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, false);
+                this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, null);
             }
         }
     };
@@ -120,7 +120,7 @@ class StudentList extends React.Component {
 
     cancelSearch = () => {
         this.props.student.searchedStudent = '';
-        this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection);
+        this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, null);
         this.forceUpdate();
     };
 
@@ -132,7 +132,7 @@ class StudentList extends React.Component {
             this.props.student.sortDirection = "asc";
          //   console.log(this.props.student.sortDirection);
 
-        this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, false);
+        this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, null);
 
     }
 
@@ -304,7 +304,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        fetchAllStudents: (currentPage, size, sortDir, addSelect) => dispatch(fetchAllStudents(currentPage, size, sortDir, addSelect)),
+        fetchAllStudents: (currentPage, size, sortDir, addedStudent) => dispatch(fetchAllStudents(currentPage, size, sortDir, addedStudent)),
         deleteStudent: (studentId) => dispatch(deleteStudent(studentId)),
         searchStudents: (searchedStudent, currentPage, sizePage) => dispatch(searchStudents(searchedStudent, currentPage, sizePage))
     }

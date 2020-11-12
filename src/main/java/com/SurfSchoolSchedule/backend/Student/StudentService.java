@@ -20,4 +20,7 @@ public interface StudentService<T> {
 
     Student updateStudent(Student student, long id, Pageable pageable);
 
-}
+    public void setNrOfLessonsForStudent(long idStudent);
+
+
+    }

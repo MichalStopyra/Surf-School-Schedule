@@ -2,7 +2,7 @@ import {
     SAVE_LESSON_REQUEST, FETCH_LESSON_REQUEST, UPDATE_LESSON_REQUEST,
     DELETE_LESSON_REQUEST, LESSON_SUCCESS, LESSON_FAILURE,
     FETCH_ALL_LESSONS_REQUEST,
-    FETCH_SEARCH_LESSONS_REQUEST
+    FETCH_SEARCH_LESSONS_REQUEST, FETCH_ALL_STUDENT_LESSONS_REQUEST
 } from "./lessonTypes";
 import axios from 'axios';
 
@@ -153,6 +153,29 @@ const searchLessonsRequest = lessons => {
     return {
         type: FETCH_SEARCH_LESSONS_REQUEST,
         lessons: lessons
+    };
+};
+
+export const fetchAllLessonsForStudent = (studentId, currentPage, size) => {
+    --currentPage;
+    return dispatch => {
+        // dispatch(fetchAllLessonsRequest());???????????????????????????
+        axios.get("http://localhost:8080/lesson-api/studentLessons/" + studentId + "?page=" + currentPage + "&size=" + size + "&sortBy=status")
+            .then(response => {
+                dispatch(fetchAllStudentLessonsRequest(response.data.content, response.data.totalPages, response.data.totalElements));
+            })
+            .catch(error => {
+                dispatch(lessonFailure(error.message));
+            });
+    };
+};
+
+const fetchAllStudentLessonsRequest = (lessons, totalPages, totalElements) => {
+    return {
+        type: FETCH_ALL_STUDENT_LESSONS_REQUEST,
+        payload: lessons,
+        totalPages: totalPages,
+        totalElements: totalElements,
     };
 };
 

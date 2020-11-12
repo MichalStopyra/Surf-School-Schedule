@@ -46,25 +46,45 @@ public class LessonController {
     }
 
     @GetMapping("/{idInstructor}/{date}")
-    public ResponseEntity<Page<Lesson>> getInstructorLessonsByDate(@PathVariable("idInstructor") long idInstructor, @PathVariable("date") String date) {
+    public ResponseEntity<Page<Lesson>> getInstructorLessonsByDate(@PathVariable("idInstructor") long idInstructor, @PathVariable("date") String date,
+                                                                   @RequestParam(defaultValue = "0") Integer page,
+                                                                   @RequestParam(defaultValue = "999999999") Integer size,
+                                                                   @RequestParam(defaultValue = "id") String sortBy,
+                                                                   @RequestParam(defaultValue = "desc") String sortDir)
 
-            //    Lesson lesson = lessonService.getLesson(idInstructor);
-//        Sort sort = Sort.by(
-//                Sort.Order.asc(date)/*,
-//                Sort.Order.asc("lastName").ignoreCase()*/
-//        );
-//        System.out.println(lessonService.getLessonsForInstructorAtDate(
-//                PageRequest.of(0, 999999999),
-//                date, idInstructor).getClass().getName());
+    {
+
+        Sort sort = Sort.by(
+                sortDir.equalsIgnoreCase("asc") ? (Sort.Order.asc(sortBy)) : (Sort.Order.desc(sortBy))
+        );
+
+        return new ResponseEntity<>(
+                lessonService.getLessonsForInstructorAtDate(
+                        PageRequest.of(page, size, sort),
 
 
+                        date, idInstructor)
+                , HttpStatus.OK);
+    }
 
-            return new ResponseEntity<>(
-                    lessonService.getLessonsForInstructorAtDate(
-                            PageRequest.of(0, 99999999),
-                            date, idInstructor)
-                    , HttpStatus.OK);
-        //}
+    @GetMapping("/studentLessons/{idStudent}")
+    public ResponseEntity<Page<Lesson>> getAllStudentLessons(@PathVariable("idStudent") long idStudent,
+                                                                   @RequestParam(defaultValue = "0") Integer page,
+                                                                   @RequestParam(defaultValue = "999999999") Integer size,
+                                                                   @RequestParam(defaultValue = "status") String sortBy,
+                                                                   @RequestParam(defaultValue = "asc") String sortDir)
+
+    {
+
+        Sort sort = Sort.by(
+                sortDir.equalsIgnoreCase("asc") ? (Sort.Order.asc(sortBy)) : (Sort.Order.desc(sortBy))
+        );
+
+        return new ResponseEntity<>(
+                lessonService.getAllStudentLessons(
+                        PageRequest.of(page, size, sort),
+                        idStudent)
+                , HttpStatus.OK);
     }
 
     @RequestMapping(value = "/list", method = RequestMethod.POST)
@@ -73,8 +93,8 @@ public class LessonController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public void updateLesson(@PathVariable("id") long id, @RequestBody Lesson lesson) {
-        lessonService.updateLesson(lesson, id);
+    public void updateLesson(@PathVariable("id") long id, @RequestBody Lesson lesson, Pageable pageable) {
+        lessonService.updateLesson(pageable, lesson, id);
     }
 
     @DeleteMapping("/list/{id}")
