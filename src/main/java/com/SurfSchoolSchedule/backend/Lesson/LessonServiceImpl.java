@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Service
 public class LessonServiceImpl implements LessonService<Lesson> {
@@ -14,10 +15,36 @@ public class LessonServiceImpl implements LessonService<Lesson> {
     @Autowired
     LessonRepository lessonRepository;
 
+
     @Transactional
     @Override
     public Page<Lesson> getAll(Pageable pageable) {
-        return lessonRepository.findAll(pageable);
+        Page<Lesson> allElementsPage = lessonRepository.findAll(pageable);
+        List<Lesson> allElementsList = allElementsPage.getContent();
+
+//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM-dd-yyyy");
+//        LocalDateTime now = LocalDateTime.now();
+//        System.out.println(now);
+
+        for (Lesson lesson : allElementsList) {
+            if(lesson.getStatus() == Lesson.Status.Not_Given)
+                deleteLesson(lesson.getId());
+
+//            String tempDate[] = lesson.getDate().split("-");
+//            StringBuffer sb = new StringBuffer();
+//            for (int i = 0; i < tempDate.length; ++i) {
+//                if (tempDate[i].length() == 1)
+//                    tempDate[i] = "0".concat(tempDate[i]);
+//                sb.append(tempDate[i]);
+//                if( i != tempDate.length - 1)
+//                    sb.append("-");
+//            }
+//            String date = sb.toString();
+//            LocalDateTime tempLocalDateTime = LocalDateTime.parse(date);
+//            System.out.println(tempLocalDateTime);
+        }
+
+        return allElementsPage;
     }
 
     @Transactional

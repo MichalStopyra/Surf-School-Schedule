@@ -80,9 +80,8 @@ const updateInstructorRequest = instructor => {
 
 export const updateInstructor = instructor => {
     //console.log(instructor);
-    instructor.NrHoursWeek = 0;
     instructor.NrHoursFull = 0;
-    instructor.WeekWage = 0;
+    //instructor.WeekWage = 0;
     //console.log(instructor);
 
     return dispatch => {

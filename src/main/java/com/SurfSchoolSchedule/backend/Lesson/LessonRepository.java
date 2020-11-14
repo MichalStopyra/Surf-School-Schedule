@@ -29,9 +29,16 @@ public interface LessonRepository extends PagingAndSortingRepository<Lesson, Lon
             "where l.student.id = :idStudent")
     Page<Lesson> getAllStudentLessons(Pageable pageable, @Param("idStudent") Long idStudent);
 
+    @Query("select l from Lesson l " +
+            "where l.instructor.id = :idInstructor")
+    Page<Lesson> getAllInstructorLessons(Pageable pageable, @Param("idInstructor") Long idInstructor);
+
     @Query("SELECT COALESCE(SUM(l.howLong), 0) FROM Lesson l WHERE l.student.id = :idStudent AND lower (l.status) like 'finished_unpaid'")
     Integer countUnpaidLessons( @Param("idStudent") Long idStudent);
 
     @Query("SELECT COALESCE(SUM(l.howLong), 0) FROM Lesson l WHERE l.student.id = :idStudent AND LOWER (l.status) NOT LIKE 'not_given' AND LOWER (l.status) NOT LIKE 'to_give' ")
     Integer countLessonHours(@Param("idStudent") Long idStudent);
+
+    @Query("SELECT COALESCE(SUM(l.howLong), 0) FROM Lesson l WHERE l.instructor.id = :idInstructor AND LOWER (l.status) NOT LIKE 'not_given' AND LOWER (l.status) NOT LIKE 'to_give' ")
+    Integer countFullNrLessonsForInstructor(@Param("idInstructor") Long idInstructor);
 }

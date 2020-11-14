@@ -1,6 +1,6 @@
 import React from 'react';
 import { Form, Card, Col, Button } from 'react-bootstrap';
-import { faSave, faUndo, faArrowLeft, faEdit, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
+import { faSave, faUndo, faArrowLeft, faEdit, faPlusSquare, faList } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import SuccessToast from '../SuccessToast';
 
@@ -21,7 +21,7 @@ class Instructor extends React.Component {
     }
 
     initialState = {
-        id: '', lastName: '', firstName: '', NrHoursWeek: 0, NrHoursFull: 0, WeekWage: 0
+        id: '', lastName: '', firstName: '', NrHoursWeek: 0, NrHoursFull: 0, WeekWage: 0, hourWage: ''
     }
 
     componentDidMount() {
@@ -45,7 +45,8 @@ class Instructor extends React.Component {
                     firstName: instructor.firstName,
                     NrHoursWeek: instructor.NrHoursWeek,
                     NrHoursFull: instructor.NrHoursFull,
-                    WeekWage: instructor.WeekWage
+                    WeekWage: instructor.WeekWage,
+                    hourWage: instructor.hourWage
                 });
             }
         }, 1000);
@@ -64,6 +65,7 @@ class Instructor extends React.Component {
             NrHoursWeek: this.state.NrHoursWeek,
             NrHoursFull: this.state.NrHoursFull,
             WeekWage: this.state.WeekWage,
+            hourWage: this.state.hourWage
         };
 
         this.props.saveInstructor(instructor);
@@ -89,6 +91,7 @@ class Instructor extends React.Component {
             NrHoursWeek: this.state.NrHoursWeek,
             NrHoursFull: this.state.NrHoursFull,
             WeekWage: this.state.WeekWage,
+            hourWage: this.state.hourWage
         };
 
         this.props.updateInstructor(instructor);
@@ -116,7 +119,7 @@ class Instructor extends React.Component {
     };//?????????????????????????????????????????????????
 
     render() {
-        const { firstName, lastName } = this.state;
+        const { firstName, lastName, hourWage } = this.state;
         const idInstructor = +this.props.match.params.id;
         return (
             <div>
@@ -158,6 +161,18 @@ class Instructor extends React.Component {
                                         className={"bg-dark text-white"} />
                                 </Form.Group>
                             </Form.Row>
+
+                            <Form.Group as={Col} controlId="formGridHourWage">
+                                    <Form.Label>Hour's Wage</Form.Label>
+                                    <Form.Control required
+                                        autoComplete="off"
+                                        type="test"
+                                        name="hourWage"
+                                        value={hourWage}
+                                        onChange={this.instructorChange}
+                                        placeholder=" Enter Week's Wage"
+                                        className={"bg-dark text-white"} />
+                            </Form.Group>
 
                         </Card.Body>
 

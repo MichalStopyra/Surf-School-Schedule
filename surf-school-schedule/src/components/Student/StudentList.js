@@ -205,7 +205,6 @@ class StudentList extends React.Component {
                                     <th onClick={this.sortData}>Payment Status<div className={sortDirection === "asc" ? "arrow arrow-down" : "arrow arrow-up"} /> </th>
                                     <th>Lesson Hrs</th>
                                     <th>Unpaid Lessons</th>
-                                    <th>Money Owing [zl]</th>
                                     <th>Payment in Advance [zl]</th>
                                     <th>Actions</th>
 
@@ -228,7 +227,6 @@ class StudentList extends React.Component {
                                             <td>{student.paymentStatus}</td>
                                             <td>{student.lessonHours}</td>
                                             <td>{student.unpaidLessons}</td>
-                                            <td>{student.moneyOwing}</td>
                                             <td>{student.moneyInAdvance}</td>
                                             <td>
                                                 <ButtonGroup>

@@ -50,6 +50,12 @@ public class StudentServiceImpl implements StudentService<Student> {
         st.setLessonHours(lessonRepository.countLessonHours(idStudent));
         // st.setMoneyOwing(lessonRepository.countmoneyOwing);
         st.setUnpaidLessons(lessonRepository.countUnpaidLessons(idStudent));
+        if(st.getUnpaidLessons() > 0 )
+            st.setPaymentStatus(Student.PaymentStatus.Owes_Us);
+        else if(st.getUnpaidLessons() == 0 && st.getMoneyInAdvance() > 0)
+            st.setPaymentStatus(Student.PaymentStatus.We_Owe);
+        else
+            st.setPaymentStatus(Student.PaymentStatus.Settled);
     }
 
     @Transactional

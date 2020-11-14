@@ -2,6 +2,7 @@ package com.SurfSchoolSchedule.backend.Instructor;
 
 import com.SurfSchoolSchedule.backend.AbstractEntity;
 import com.SurfSchoolSchedule.backend.Lesson.Lesson;
+import com.SurfSchoolSchedule.backend.WeekInstructor.WeekInstructor;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,20 +25,21 @@ public class Instructor extends AbstractEntity {
     private String lastName;
 
     @Column
+    private Double hourWage;
+
+    @Column
     private int nrHoursFull;
 
-    @Column
-    private int nrHoursWeek;
 
-    @Column
-    private int wageWeek;
-
-    //mapped by????
     @JsonIgnore
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
-    //@JoinColumn(name ="FK_Lesson")
     private List<Lesson> lessons = new LinkedList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private List<WeekInstructor> weekInstructorList = new LinkedList<>();
 
     public String getFirstName() {
         return firstName;
@@ -63,20 +65,12 @@ public class Instructor extends AbstractEntity {
         this.nrHoursFull = nrHoursFull;
     }
 
-    public int getNrHoursWeek() {
-        return nrHoursWeek;
+    public Double getHourWage() {
+        return hourWage;
     }
 
-    public void setNrHoursWeek(int nrHoursWeek) {
-        this.nrHoursWeek = nrHoursWeek;
-    }
-
-    public int getWageWeek() {
-        return wageWeek;
-    }
-
-    public void setWageWeek(int wageWeek) {
-        this.wageWeek = wageWeek;
+    public void setHourWage(Double hourWage) {
+        this.hourWage = hourWage;
     }
 
     @JsonIgnore
@@ -89,8 +83,18 @@ public class Instructor extends AbstractEntity {
         this.lessons = lessons;
     }
 
+    @JsonIgnore
+    public List<WeekInstructor> getWeekInstructorList() {
+        return weekInstructorList;
+    }
+    @JsonProperty
+    public void setWeekInstructorList(List<WeekInstructor> weekInstructorList) {
+        this.weekInstructorList = weekInstructorList;
+    }
+
     public void setAllFormValues(Instructor newInstructor) {
         this.setLastName(newInstructor.getLastName());
         this.setFirstName(newInstructor.getFirstName());
+        this.setHourWage(newInstructor.getHourWage());
     }
 }

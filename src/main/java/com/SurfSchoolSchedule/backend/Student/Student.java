@@ -41,8 +41,6 @@ public class Student extends AbstractEntity {
     @Column
     private int unpaidLessons;
 
-    @Column
-    private int moneyOwing;
 
     @Column
     private int moneyInAdvance;
@@ -103,14 +101,6 @@ public class Student extends AbstractEntity {
 
     public void setUnpaidLessons(int unpaidLessons) {
         this.unpaidLessons = unpaidLessons;
-    }
-
-    public int getMoneyOwing() {
-        return moneyOwing;
-    }
-
-    public void setMoneyOwing(int moneyOwing) {
-        this.moneyOwing = moneyOwing;
     }
 
     public int getMoneyInAdvance() {

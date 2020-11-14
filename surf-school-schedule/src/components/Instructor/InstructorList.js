@@ -209,6 +209,7 @@ class InstructorList extends React.Component {
                                 <tr>
                                     <th onClick={this.sortData}>Last Name<div className={sortDirection ==="asc" ? "arrow arrow-down" : "arrow arrow-up"} /></th>
                                     <th>First Name</th>
+                                    <th>Hour's Wage [zl]</th>
                                     <th>Nr Hours Week</th>
                                     <th>Week's Wage</th>
                                     <th>Full Nr Hours</th>
@@ -227,9 +228,10 @@ class InstructorList extends React.Component {
                                         <tr key={instructor.id}>
                                             <td>{instructor.lastName}</td>
                                             <td>{instructor.firstName}</td>
+                                            <td>{instructor.hourWage}</td>
                                             <td>{instructor.nrHoursWeek}</td>
-                                            <td>{instructor.nrHoursFull}</td>
                                             <td>{instructor.wageWeek}</td>
+                                            <td>{instructor.nrHoursFull}</td>
                                             <td>
                                                 <ButtonGroup>
                                                     <Link to={"settleInstructor/" + instructor.id}> <Button size="sm" variant="outline-success"> <FontAwesomeIcon icon={faWallet} /> </Button> </Link>

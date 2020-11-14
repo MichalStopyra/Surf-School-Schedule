@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Card, Table, ButtonGroup, Button, InputGroup, FormControl, Form, Col } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faWallet, faMoneyCheckAlt, faUndo, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faWallet, faMoneyCheckAlt, faUndo, faArrowLeft, faList } from '@fortawesome/free-solid-svg-icons';
 import SuccessToast from '../SuccessToast';
 import StudentLessonsList from './StudentLessonsList';
 import { connect } from 'react-redux';
@@ -33,12 +33,13 @@ class StudentSettle extends React.Component {
             howMany2p: '',
             howMany3p: '',
             currentPage: 1,
-            lessonsPerPage: 5,
+            lessonsPerPage: 20,
             searchedLesson: '',
             sortToggle: false,
             disableCustomPrice: true,
             disableDiscount: true,
-            showSuccessMessage: false
+            showSuccessMessage: false,
+            showLessonList: false
         };
     }
 
@@ -58,7 +59,7 @@ class StudentSettle extends React.Component {
         tempTotalPrice += this.state.priceOneH[1] * this.state.howMany2p;
         tempTotalPrice += this.state.priceOneH[2] * this.state.howMany3p;
         tempTotalPrice = tempTotalPrice * (100 - this.state.discount) / 100
-        if(this.props.student.student.moneyInAdvance)
+        if (this.props.student.student.moneyInAdvance)
             tempTotalPrice -= this.props.student.student.moneyInAdvance;
         this.setState({
             totalPrice: tempTotalPrice
@@ -205,8 +206,8 @@ class StudentSettle extends React.Component {
 
     settleStudent = () => {
         const studentLessons = this.props.lessons
-        for(let i=0; i< studentLessons.length; ++i) {
-            if (studentLessons[i].status==='Finished_Unpaid') {
+        for (let i = 0; i < studentLessons.length; ++i) {
+            if (studentLessons[i].status === 'Finished_Unpaid') {
                 const lesson = {
                     id: studentLessons[i].id,
                     instructor: studentLessons[i].instructor,
@@ -217,17 +218,22 @@ class StudentSettle extends React.Component {
                     nrStudents: studentLessons[i].nrStudents,
                     status: "Finished_Paid"
                 };
-              //  console.log(lesson);
+                //  console.log(lesson);
                 this.props.updateLesson(lesson);
             }
         }
 
-        if (this.state.totalPrice < 0 )
+        if (this.state.totalPrice < 0) {
             var newMoneyInAdvance = -this.state.totalPrice;
-            //let newStudentStatus = "We_Owe"
-           // Owes_Us
-        else
+            var newPaymentStatus = "We_Owe";
+        }
+        //let newStudentStatus = "We_Owe"
+        // Owes_Us
+        else {
             var newMoneyInAdvance = 0;
+            var newPaymentStatus = "Settled"
+        }
+
 
         const student = {
             id: this.props.student.student.id,
@@ -235,15 +241,15 @@ class StudentSettle extends React.Component {
             firstName: this.props.student.student.firstName,
             idCardNr: this.props.student.student.idCardNr,
             telNr: this.props.student.student.telNr,
-            //paymentStatus: this.props.student.student.paymentStatus,
+            paymentStatus: newPaymentStatus,
             lessonHours: this.props.student.student.lessonHours,
             unpaidLessons: this.props.student.student.unpaidLessons,
             moneyOwing: this.props.student.student.moneyOwing,
             moneyInAdvance: newMoneyInAdvance
         };
-       // console.log(student);
+        // console.log(student);
 
-       
+
         this.props.updateStudent(student);
 
         setTimeout(() => {
@@ -257,6 +263,12 @@ class StudentSettle extends React.Component {
                 setTimeout(() => this.setState({ "showInvalidMessage": false }), 3000);
             }
         }, 2000);
+    }
+
+    listButtonHandle = () => {
+        this.setState({
+            showLessonList: !this.state.showLessonList
+        });
     }
 
     render() {
@@ -293,6 +305,8 @@ class StudentSettle extends React.Component {
                     <SuccessToast show={this.state.show} message={"Student Settled Successfully"} type="success" />
                 </div>
 
+                <StudentLessonsList showLessonList={this.state.showLessonList} student={student} lessons={lessons}
+                    onClose={this.listButtonHandle} />
                 {/* <div style={{ "display": this.state.showInvalidMessage ? "block" : "none" }}>
                 <SuccessToast show={this.state.showInvalidMessage} message={"Invalid Data - might be in the data base already"} type="dangerNoSuccess" />
             </div> */}
@@ -313,7 +327,7 @@ class StudentSettle extends React.Component {
                                     <h5>{lessonHours}</h5>
 
                                     <h6>Nr of Unpaid Lessons [h] (1p/2p/+3p)</h6>
-                                    <h5>{unpaidLessons} ({howMany1p?howMany1p : 0 }/{howMany2p? howMany2p : 0 }/{howMany3p? howMany3p : 0})</h5>
+                                    <h5>{unpaidLessons} ({howMany1p ? howMany1p : 0}/{howMany2p ? howMany2p : 0}/{howMany3p ? howMany3p : 0})</h5>
 
                                     <h6>Money in advance [zl]</h6>
                                     <h5>{moneyInAdvance}</h5>
@@ -386,16 +400,25 @@ class StudentSettle extends React.Component {
                         </Card.Body>
 
                         <Card.Footer>
-                            <div>
-                                <Button size="sm" variant="info" onClick={() => this.settleStudent() }>
-                                    <FontAwesomeIcon icon={faMoneyCheckAlt} />  Settle
+                            <div id="container" style={{ "clear": "both", "display": "flex", "justifyContent": "space-between" }}>
+                                <div>
+                                    <Button size="sm" variant="info" onClick={() => this.settleStudent()}>
+                                        <FontAwesomeIcon icon={faMoneyCheckAlt} />  Settle
                                 </Button>
-                                {'      '}
+                                    {'      '}
 
-                                <Button size="sm" variant="secondary" type="reset">
-                                    <FontAwesomeIcon icon={faUndo} />  Reset
-                </Button>
+
+
+                                    <Button size="sm" variant="secondary" type="reset">
+                                        <FontAwesomeIcon icon={faUndo} />  Reset
+                                </Button>
+                                </div>
+                                <Button size="bg" variant="light" disabled={lessons.filter(lesson => lesson.status == "Finished_Unpaid").length ? false : true}
+                                    onClick={() => this.listButtonHandle()}>
+                                    <FontAwesomeIcon icon={faList} />  Unpaid Lessons
+                                </Button>
                             </div>
+                                
                             {'      '}
                             <div>
                                 <Button size="sm" variant="light" type="button" onClick={() => this.returnToStudentList()}>
