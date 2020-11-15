@@ -34,10 +34,8 @@ public class Lesson extends AbstractEntity {
     @NotNull
     private Double howLong;
 
-   // @NotNull
     private int nrStudents;
 
-    //@NotNull
     @Enumerated(EnumType.STRING)
     private Lesson.Status status;
 

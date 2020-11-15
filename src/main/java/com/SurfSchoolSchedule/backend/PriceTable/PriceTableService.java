@@ -18,6 +18,5 @@ public interface PriceTableService <T> {
 
     PriceTable updatePriceTable(Pageable pageable, PriceTable priceTable, long id);
 
-    //public void ifPriceTableEmptyPopulateData(Pageable pageable);
 
 }

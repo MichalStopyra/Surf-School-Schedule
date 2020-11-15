@@ -1,34 +1,29 @@
-import React from 'react';
-
-import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { Alert, Card, Table, ButtonGroup, Button, InputGroup, FormControl } from 'react-bootstrap';
+import { faEdit, faMoneyCheckAlt, faPlusSquare, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMoneyCheckAlt, faEdit, faTrash, faPlusSquare} from '@fortawesome/free-solid-svg-icons';
+import React from 'react';
+import { Button, ButtonGroup, Card, Table } from 'react-bootstrap';
+import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import SuccessToast from '../SuccessToast';
-
+import { deletePriceTable, fetchAllPriceTables } from './../../services/index';
 import './../../style/Style.css';
 
 
-import { connect } from 'react-redux';
-import { deletePriceTable, fetchAllPriceTables } from './../../services/index';
+
+
 
 class PriceTableList extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            priceTables: []//,
-            // currentPage: 1,
-            //   priceTablesPerPage: 5,
-            //  searchedPriceTable: '',
-            //sortToggle: true
+            priceTables: []
         };
     }
 
 
     componentDidMount() {
-        this.props.fetchAllPriceTables(/*this.props.priceTable.currentPage, this.state.priceTablesPerPage, this.props.priceTable.sortDirection*/);
+        this.props.fetchAllPriceTables();
     }
 
     deletePriceTable = (idPriceTable) => {
@@ -44,128 +39,14 @@ class PriceTableList extends React.Component {
                 this.setState({ "show": false });
             }
         }, 1000);
-        this.props.fetchAllPriceTables(/*this.props.priceTable.currentPage, this.state.priceTablesPerPage, this.props.priceTable.sortDirection, false*/);
+        this.props.fetchAllPriceTables();
 
     };
 
-    // changePage = event => {
-    //     let target = parseInt(event.target.value);
-    //     if (this.props.priceTable.searchedPriceTable) {
-    //         this.searchPriceTable(target)
-    //     } else {
-    //         let sortDirection = this.state.sortToggle ? "asc" : "desc";
-    //         this.props.fetchAllPriceTables(target, this.state.priceTablesPerPage, this.props.priceTable.sortDirection, false);
-    //     }
-    //     this.setState({
-    //         [event.target.name]: target
-    //     });
-
-    // };
-
-    // firstPage = () => {
-    //     let firstPage = 1;
-
-    //     if (this.props.priceTable.currentPage > firstPage) {
-    //         this.props.priceTable.currentPage = 1;
-    //         if (this.props.priceTable.searchedPriceTable) {
-    //             this.searchPriceTable(this.props.priceTable.currentPage)
-    //         } else {
-    //             let sortDirection = this.state.sortToggle ? "asc" : "desc";
-    //             this.props.fetchAllPriceTables(this.props.priceTable.currentPage, this.state.priceTablesPerPage, this.props.priceTable.sortDirection);
-    //         }
-    //     }
-    // };
-
-    // prevPage = () => {
-    //     if (this.props.priceTable.currentPage > 1) {
-    //         --this.props.priceTable.currentPage;
-    //         if (this.props.priceTable.searchedPriceTable) {
-    //             this.searchPriceTable(this.props.priceTable.currentPage)
-    //         } else {
-    //             let sortDirection = this.state.sortToggle ? "asc" : "desc";
-    //             this.props.fetchAllPriceTables(this.props.priceTable.currentPage, this.state.priceTablesPerPage, this.props.priceTable.sortDirection, false);
-    //         }
-    //     }
-    // };
-
-    // lastPage = () => {
-    //     let priceTablesLength = this.state.priceTables.length;
-    //     let lastPage = Math.ceil(this.props.totalElements / this.state.priceTablesPerPage);
-    //     if (this.props.priceTable.currentPage < lastPage) {
-    //         this.props.priceTable.currentPage = lastPage;
-    //         if (this.props.priceTable.searchedPriceTable) {
-    //             this.searchPriceTable(this.props.priceTable.currentPage)
-    //         } else {
-    //             this.props.fetchAllPriceTables(this.props.priceTable.currentPage, this.state.priceTablesPerPage, this.props.priceTable.sortDirection);
-    //         }
-    //     }
-    // };
-
-    // nextPage = () => {
-    //     if (this.state.currentPage < Math.ceil(this.props.totalElements / this.state.priceTablesPerPage)) {
-    //         ++this.props.priceTable.currentPage;
-
-    //         if (this.props.priceTable.searchedPriceTable) {
-    //             this.searchPriceTable(this.props.priceTable.currentPage)
-    //         } else {
-    //             let sortDirection = this.state.sortToggle ? "asc" : "desc";
-    //             this.props.fetchAllPriceTables(this.props.priceTable.currentPage, this.state.priceTablesPerPage, this.props.priceTable.sortDirection, false);
-    //         }
-    //     }
-    // };
-
-    // searchChange = event => {
-    //     this.props.priceTable.searchedPriceTable = event.target.value;
-    //     this.forceUpdate();
-    // };
-
-    // cancelSearch = () => {
-    //     this.props.priceTable.searchedPriceTable = '';
-    //     this.props.fetchAllPriceTables(this.props.priceTable.currentPage, this.state.priceTablesPerPage, this.props.priceTable.sortDirection, false);
-    //     this.forceUpdate();
-    // };
-
-    // sortData = () => {
-    //    // console.log(this.props.priceTable.sortDirection);
-    //     if (this.props.priceTable.sortDirection === "asc")
-    //         this.props.priceTable.sortDirection = "desc";
-    //     else
-    //         this.props.priceTable.sortDirection = "asc";
-    //      //   console.log(this.props.priceTable.sortDirection);
-
-    //     this.props.fetchAllPriceTables(this.props.priceTable.currentPage, this.state.priceTablesPerPage, this.props.priceTable.sortDirection, false);
-
-    // }
-
-    // searchPriceTable = (currentPage) => {
-    //     if (this.props.priceTable.searchedPriceTable)
-    //         this.props.searchPriceTables(this.props.priceTable.searchedPriceTable, this.props.priceTable.currentPage, this.props.priceTable.priceTablesPerPage);
-    // }
 
     render() {
-        // const searchedPriceTable = this.props.priceTable.searchedPriceTable;
-        //const totalPages = this.props.priceTable.totalPages;
-        //const totalElements = this.props.priceTable.totalElements;
-        const priceTable = this.props.priceTable;
         const priceTables = this.props.priceTables;
-        //const currentPage = this.props.priceTable.currentPage;
-        //const sortDirection = this.props.priceTable.sortDirection;
 
-        const pageNumCss = {
-            width: "45px",
-            border: "1px solid #F8F8FF",
-            color: "#F8F8FF",
-            textAlign: "center",
-            fontWeight: "bold"
-        };
-
-        const searchBoxCss = {
-            width: "100px",
-            border: "1px solid #17A2B8",
-            color: "#17A2B8",
-            textAlign: "center",
-            fontWeight: "bold"
-        };
 
 
         return (
@@ -175,11 +56,6 @@ class PriceTableList extends React.Component {
                     <SuccessToast show={this.state.show} message="PriceTable Deleted Successfully." type="danger" />
                 </div>
 
-                {/* {priceTableData.error ?
-                <Alert variant="danger">
-                    {priceTableData.error}
-
-                </Alert> : */}
                 <Card className={"border border-dark bg-dark text-white"}>
                     <Card.Header>
                         <div style={{ "float": "left" }}>
@@ -208,7 +84,7 @@ class PriceTableList extends React.Component {
                                         <td colSpan="10"> No PriceTables in the Data Base</td>
                                     </tr> :
 
-                                    priceTables.map((priceTable, index) => (
+                                    priceTables.map((priceTable) => (
                                         <tr key={priceTable.id}>
                                             <td>{priceTable.name}</td>
                                             <td>{priceTable.minNrHours}</td>

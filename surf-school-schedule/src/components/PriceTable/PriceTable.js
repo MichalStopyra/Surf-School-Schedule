@@ -1,12 +1,12 @@
-import React from 'react';
-import { Form, Card, Col, Button } from 'react-bootstrap';
-import { faSave, faUndo, faArrowLeft, faEdit, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faEdit, faPlusSquare, faSave, faUndo } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React from 'react';
+import { Button, Card, Col, Form } from 'react-bootstrap';
+import { connect } from 'react-redux';
+import { fetchPriceTable, savePriceTable, updatePriceTable } from '../../services/index';
 import SuccessToast from '../SuccessToast';
 
 
-import { connect } from 'react-redux';
-import { savePriceTable, fetchPriceTable, updatePriceTable } from '../../services/index';
 
 class PriceTable extends React.Component {
 
@@ -107,13 +107,13 @@ class PriceTable extends React.Component {
 
     resetPriceTable = () => {
         this.setState(() => this.initialState);
-    };//??????????????????????????????????????????????????????????
+    };
 
     priceTableChange = event => {
         this.setState({
             [event.target.name]: event.target.value
         });
-    };//?????????????????????????????????????????????????
+    };
 
     render() {
         const { name, minNrHours, onePPrice, twoPPrice, threePPrice } = this.state;
@@ -229,9 +229,6 @@ class PriceTable extends React.Component {
 
 const mapStateToProps = state => {
     return {
-        //savedPriceTableObject: state.priceTable,
-        //      priceTableObject: state.priceTable,
-        //  updatedPriceTable: state.priceTable.priceTable
         priceTable: state.priceTable
     };
 };

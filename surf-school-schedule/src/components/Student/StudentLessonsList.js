@@ -1,16 +1,13 @@
-import React from 'react';
-
-import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { Modal, Card, Table, ButtonGroup, Button, InputGroup, FormControl } from 'react-bootstrap';
+import { faList } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faList, faWallet, faEdit, faTrash, faCalendarPlus, faStepBackward, faFastBackward, faStepForward, faFastForward, faSearch, faTimes, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
-import SuccessToast from '../SuccessToast';
-
+import React from 'react';
+import { Card, Modal, Table } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import { deleteLesson, fetchAllLessonsForStudent, searchLessons, updateLesson } from './../../services/index';
-
 import './../../style/Style.css';
+
+
+
 
 
 class StudentSettle extends React.Component {
@@ -20,9 +17,6 @@ class StudentSettle extends React.Component {
     }
 
     componentDidMount() {
-        //  const idStudent = this.props.studentId;
-
-        //this.props.fetchAllLessonsForStudent(this.props.studentId, 0, 999999);
         setTimeout(() => {
             this.checkIfLessonInThePast();
         }, 99999900)
@@ -58,36 +52,10 @@ class StudentSettle extends React.Component {
 
 
     render() {
-        const searchedLesson = this.props.lesson.searchedLesson;
-        const totalPages = this.props.lesson.totalPages;
-        const totalElements = this.props.lesson.totalElements;
-        const lesson = this.props.lesson;
         const lessons = this.props.lessons;
-        const currentPage = 0;
-
-        const pageNumCss = {
-            width: "45px",
-            border: "1px solid #F8F8FF",
-            color: "#F8F8FF",
-            textAlign: "center",
-            fontWeight: "bold"
-        };
-
-        const searchBoxCss = {
-            width: "9999990px",
-            border: "1px solid #17A2B8",
-            color: "#17A2B8",
-            textAlign: "center",
-            fontWeight: "bold"
-        };
-
-
         return (
             <div>
-                <Modal show={this.props.showLessonList} onHide={() => this.props.onClose()}
-                //</div> onHide={() => this.resetAndCloseForm()}
-                // onShow={() => this.onShowHandle()}
-                >
+                <Modal show={this.props.showLessonList} onHide={() => this.props.onClose()}>
                     <Modal.Header className={"border border-light bg-dark text-white"} closeButton>
 
                         <div style={{ "float": "left" }}>

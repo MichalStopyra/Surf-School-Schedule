@@ -1,15 +1,14 @@
-import React from 'react';
-
-import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { Card, Table, ButtonGroup, Button, InputGroup, FormControl, Form, Col } from 'react-bootstrap';
+import { faArrowLeft, faMoneyCheckAlt, faWallet } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faWallet, faMoneyCheckAlt, faUndo, faArrowLeft, faList } from '@fortawesome/free-solid-svg-icons';
-import SuccessToast from '../SuccessToast';
+import axios from 'axios';
+import React from 'react';
+import { Button, Card, Col, Form } from 'react-bootstrap';
 import { connect } from 'react-redux';
+import SuccessToast from '../SuccessToast';
 import { fetchInstructor, updateInstructor } from './../../services/index';
-
 import './../../style/Style.css';
+
+
 
 
 class InstructorSettle extends React.Component {
@@ -118,12 +117,6 @@ class InstructorSettle extends React.Component {
             });
     }
 
-    // listButtonHandle = () => {
-    //     this.setState({
-    //         showLessonList: !this.state.showLessonList
-    //     });
-    // }
-
     render() {
         const instructor = this.state.instructor;
         const { weekInstructorTab, weekInstructor } = this.state
@@ -189,12 +182,13 @@ class InstructorSettle extends React.Component {
                                         onChange={this.settleChange}
                                         className={"bg-dark text-white"}>
                                         {weekInstructorTab.filter(weekInstructor =>
+                                            weekInstructor.status === "Not_Settled").length ? weekInstructorTab.filter(weekInstructor =>
                                             weekInstructor.status === "Not_Settled")
                                             .map(weekInstructor =>
                                                 <option key={weekInstructor.id} value={weekInstructor}>
                                                     {weekInstructor.beginningDate} - {weekInstructor.endDate}
                                                 </option>
-                                            )}
+                                            ) : <option>All weeks are settled</option>}
                                     </Form.Control>
                                 </Form.Group>
 

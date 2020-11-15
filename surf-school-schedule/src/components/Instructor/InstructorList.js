@@ -1,17 +1,16 @@
-import React from 'react';
-
-import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { Alert, Card, Table, ButtonGroup, Button, InputGroup, FormControl } from 'react-bootstrap';
+import { faChalkboardTeacher, faEdit, faFastBackward, faFastForward, faSearch, faStepBackward, faStepForward, faTimes, faTrash, faUserPlus, faWallet } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChalkboardTeacher, faWallet, faEdit, faTrash, faUserPlus, faStepBackward, faFastBackward, faStepForward, faFastForward, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
+import React from 'react';
+import { Button, ButtonGroup, Card, FormControl, InputGroup, Table } from 'react-bootstrap';
+import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import SuccessToast from '../SuccessToast';
-
+import { deleteInstructor, fetchAllInstructors, searchInstructors } from './../../services/index';
 import './../../style/Style.css';
 
 
-import { connect } from 'react-redux';
-import { deleteInstructor, fetchAllInstructors, searchInstructors } from './../../services/index';
+
+
 
 class InstructorList extends React.Component {
 
@@ -53,7 +52,6 @@ class InstructorList extends React.Component {
         if (this.props.instructor.searchedInstructor) {
             this.searchInstructor(target)
         } else {
-            let sortDirection = this.state.sortToggle ? "asc" : "desc";
             this.props.fetchAllInstructors(target, this.state.instructorsPerPage, this.props.instructor.sortDirection, false);
         }
         this.setState({
@@ -70,7 +68,6 @@ class InstructorList extends React.Component {
             if (this.props.instructor.searchedInstructor) {
                 this.searchInstructor(this.props.instructor.currentPage)
             } else {
-                let sortDirection = this.state.sortToggle ? "asc" : "desc";
                 this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection);
             }
         }
@@ -82,14 +79,12 @@ class InstructorList extends React.Component {
             if (this.props.instructor.searchedInstructor) {
                 this.searchInstructor(this.props.instructor.currentPage)
             } else {
-                let sortDirection = this.state.sortToggle ? "asc" : "desc";
                 this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection, false);
             }
         }
     };
 
     lastPage = () => {
-        let instructorsLength = this.state.instructors.length;
         let lastPage = Math.ceil(this.props.totalElements / this.state.instructorsPerPage);
         if (this.props.instructor.currentPage < lastPage) {
             this.props.instructor.currentPage = lastPage;
@@ -108,7 +103,6 @@ class InstructorList extends React.Component {
             if (this.props.instructor.searchedInstructor) {
                 this.searchInstructor(this.props.instructor.currentPage)
             } else {
-                let sortDirection = this.state.sortToggle ? "asc" : "desc";
                 this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection, false);
             }
         }
@@ -126,18 +120,16 @@ class InstructorList extends React.Component {
     };
 
     sortData = () => {
-       // console.log(this.props.instructor.sortDirection);
         if (this.props.instructor.sortDirection === "asc")
             this.props.instructor.sortDirection = "desc";
         else
             this.props.instructor.sortDirection = "asc";
-         //   console.log(this.props.instructor.sortDirection);
 
         this.props.fetchAllInstructors(this.props.instructor.currentPage, this.state.instructorsPerPage, this.props.instructor.sortDirection, false);
 
     }
 
-    searchInstructor = (currentPage) => {
+    searchInstructor = () => {
         if (this.props.instructor.searchedInstructor)
             this.props.searchInstructors(this.props.instructor.searchedInstructor, this.props.instructor.currentPage, this.props.instructor.instructorsPerPage);
     }
@@ -145,8 +137,6 @@ class InstructorList extends React.Component {
     render() {
         const searchedInstructor = this.props.instructor.searchedInstructor;
         const totalPages = this.props.instructor.totalPages;
-        const totalElements = this.props.instructor.totalElements;
-        const instructor = this.props.instructor;
         const instructors = this.props.instructors;
         const currentPage = this.props.instructor.currentPage;
         const sortDirection = this.props.instructor.sortDirection;
@@ -174,12 +164,6 @@ class InstructorList extends React.Component {
                 <div style={{ "display": this.state.show ? "block" : "none" }}>
                     <SuccessToast show={this.state.show} message="Instructor Deleted Successfully." type="danger" />
                 </div>
-
-                {/* {instructorData.error ?
-                <Alert variant="danger">
-                    {instructorData.error}
-
-                </Alert> : */}
                 <Card className={"border border-dark bg-dark text-white"}>
                     <Card.Header>
                         <div style={{ "float": "left" }}>
@@ -224,7 +208,7 @@ class InstructorList extends React.Component {
                                         <td colSpan="10"> No Instructors in the Data Base</td>
                                     </tr> :
 
-                                    instructors.map((instructor, index) => (
+                                    instructors.map((instructor) => (
                                         <tr key={instructor.id}>
                                             <td>{instructor.lastName}</td>
                                             <td>{instructor.firstName}</td>

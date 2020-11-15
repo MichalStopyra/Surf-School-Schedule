@@ -56,11 +56,7 @@ public class InstructorContoller {
         return new ResponseEntity<>(instructorService.updateInstructor(instructor, id, pageable), HttpStatus.OK);
     }
 
-//    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-//    public void updateInstructor(@PathVariable("id") long id, @RequestBody Instructor instructor) {
-//        instructorService.updateInstructor(instructor, id);
-//    }
-    
+
     @RequestMapping(value = "/list", method = RequestMethod.POST)
     public ResponseEntity<Instructor> addNewInstructor(@RequestBody Instructor instructorObj, Pageable pageable) {
         return new ResponseEntity<>(instructorService.addNewInstructor(pageable, instructorObj), HttpStatus.CREATED);

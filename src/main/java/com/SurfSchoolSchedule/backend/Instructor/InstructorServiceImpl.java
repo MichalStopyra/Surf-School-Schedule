@@ -35,7 +35,6 @@ public class InstructorServiceImpl implements InstructorService<Instructor> {
         List<Instructor> allElementsList = allElementsPage.getContent();
 
         LocalDate today = LocalDate.now();
-        //DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM-dd-yyyy");
 
         Sort tempSort = Sort.by(Sort.Order.desc("beginningDate"));
         Pageable tempPageable = PageRequest.of(
@@ -47,17 +46,20 @@ public class InstructorServiceImpl implements InstructorService<Instructor> {
                     today.format(DateTimeFormatter.ofPattern("MM-dd-yyyy")));
 
             if (tempWeekInstructor == null) {
+
                 WeekInstructor newWeekInstructor = new WeekInstructor();
                 weekInstructorService.setValues(tempPageable, newWeekInstructor, instructor);
                 weekInstructorService.setStatus(tempPageable, newWeekInstructor, WeekInstructor.Status.Not_Settled);
 
                 weekInstructorService.addNewWeekInstructor(tempPageable, newWeekInstructor);
 
-            } else
-                weekInstructorService.setValues(pageable, tempWeekInstructor, instructor);
-                weekInstructorService.setStatus(tempPageable, tempWeekInstructor, tempWeekInstructor.getStatus() );
 
+            } else {
+                weekInstructorService.setValues(pageable, tempWeekInstructor, instructor);
+                weekInstructorService.setStatus(tempPageable, tempWeekInstructor, tempWeekInstructor.getStatus());
+            }
         }
+
         return allElementsPage;
     }
 

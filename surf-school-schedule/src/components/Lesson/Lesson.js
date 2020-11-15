@@ -1,16 +1,12 @@
-import React from 'react';
-import { Form, Card, Col, Button } from 'react-bootstrap';
-import { faSave, faUndo, faArrowLeft, faEdit, faPlusSquare, faLanguage } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faEdit, faPlusSquare, faSave, faUndo } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
-import moment from 'moment';
-import SuccessToast from '../SuccessToast';
-import Instructor from '../Instructor/Instructor';
-import Student from '../Student/Student';
-
+import React from 'react';
+import { Button, Card, Col, Form } from 'react-bootstrap';
 import { connect } from 'react-redux';
-import { saveLesson, fetchLesson, updateLesson, fetchAllInstructors, fetchAllStudents } from '../../services/index';
+import { fetchAllInstructors, fetchAllStudents, fetchLesson, saveLesson, updateLesson } from '../../services/index';
+import SuccessToast from '../SuccessToast';
+
 
 class Lesson extends React.Component {
 
@@ -476,9 +472,6 @@ class Lesson extends React.Component {
 }
 const mapStateToProps = state => {
     return {
-        //savedStudentObject: state.student,
-        //      studentObject: state.student,
-        //  updatedStudent: state.student.student
         lesson: state.lesson,
         instructor: state.instructor,
         student: state.student

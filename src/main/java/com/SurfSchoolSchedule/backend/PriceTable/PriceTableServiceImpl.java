@@ -39,6 +39,11 @@ public class PriceTableServiceImpl implements PriceTableService<PriceTable> {
     public PriceTable getPriceTableByFullNrOfHours(Pageable pageable, int fullNrOfHours) {
         Page<PriceTable> priceTablePage = priceTableRepository.findByFullNrOfLessons(pageable, fullNrOfHours);
         List<PriceTable> priceTableList = priceTablePage.getContent();
+        if(priceTableList.size()==0) {
+            priceTablePage = priceTableRepository.findAll(pageable);
+            priceTableList = priceTablePage.getContent();
+        }
+
         return priceTableList.get(0);
     }
 
@@ -78,14 +83,5 @@ public class PriceTableServiceImpl implements PriceTableService<PriceTable> {
         return priceTableRepository.findByPrices(pageable, newPriceTable.getMinNrHours(), newPriceTable.getOnePPrice(),
                 newPriceTable.getTwoPPrice(), newPriceTable.getThreePPrice()).isEmpty();
     }
-//
-//    @PostConstruct
-//    @Override
-//    public void ifPriceTableEmptyPopulateData(Pageable pageable) {
-//        if(priceTableRepository.findAll(pageable).isEmpty()) {
-//            priceTableRepository.saveAll()
-//
-//        }
-//
-//    }
+
 }

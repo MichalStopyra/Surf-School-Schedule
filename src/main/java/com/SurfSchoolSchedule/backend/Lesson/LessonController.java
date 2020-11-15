@@ -24,8 +24,7 @@ public class LessonController {
             @RequestParam(defaultValue = "date") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
         Sort sort = Sort.by(
-                sortDir.equalsIgnoreCase("asc") ? (Sort.Order.asc(sortBy)) : (Sort.Order.desc(sortBy))/*,
-                Sort.Order.asc("lastName").ignoreCase()*/
+                sortDir.equalsIgnoreCase("asc") ? (Sort.Order.asc(sortBy)) : (Sort.Order.desc(sortBy))
         );
 
         return new ResponseEntity<>(

@@ -29,7 +29,6 @@ public class StudentServiceImpl implements StudentService<Student> {
         for (Student student : allElementsList) {
             setNrOfLessonsForStudent(student.getId());
         }
-        //return studentRepository.findAll(pageable);
          return allElementsPage;
     }
 
@@ -48,7 +47,6 @@ public class StudentServiceImpl implements StudentService<Student> {
     public void setNrOfLessonsForStudent(long idStudent) {
         Student st = studentRepository.findById(idStudent).get();
         st.setLessonHours(lessonRepository.countLessonHours(idStudent));
-        // st.setMoneyOwing(lessonRepository.countmoneyOwing);
         st.setUnpaidLessons(lessonRepository.countUnpaidLessons(idStudent));
         if(st.getUnpaidLessons() > 0 )
             st.setPaymentStatus(Student.PaymentStatus.Owes_Us);

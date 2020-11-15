@@ -1,19 +1,18 @@
-import React from 'react';
-
-import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { Card, Table, ButtonGroup, Button, InputGroup, FormControl, Form, Col } from 'react-bootstrap';
+import { faArrowLeft, faList, faMoneyCheckAlt, faUndo, faWallet } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faWallet, faMoneyCheckAlt, faUndo, faArrowLeft, faList } from '@fortawesome/free-solid-svg-icons';
-import SuccessToast from '../SuccessToast';
-import StudentLessonsList from './StudentLessonsList';
+import React from 'react';
+import { Button, Card, Col, Form, InputGroup } from 'react-bootstrap';
 import { connect } from 'react-redux';
+import SuccessToast from '../SuccessToast';
 import {
-    deleteLesson, fetchAllLessonsForStudent, searchLessons, updateLesson,
-    fetchStudent, fetchAllPriceTables, fetchPriceTableWithNrOfLessons, updateStudent
+    deleteLesson, fetchAllLessonsForStudent,
+    fetchAllPriceTables, fetchPriceTableWithNrOfLessons, fetchStudent, searchLessons, updateLesson,
+    updateStudent
 } from './../../services/index';
-
 import './../../style/Style.css';
+import StudentLessonsList from './StudentLessonsList';
+
+
 
 
 class StudentSettle extends React.Component {
@@ -111,7 +110,6 @@ class StudentSettle extends React.Component {
     }
 
     setPriceOneH = () => {
-        // let priceOneHTab = [this.props.priceTable.priceTable.onePPrice, this.props.priceTable.priceTable.twoPPrice, this.props.priceTable.priceTable.threePPrice]
         let priceOneHTab;
         if (this.state.customPrice) {
             priceOneHTab = [this.state.customPrice, this.state.customPrice, this.state.customPrice]
@@ -136,27 +134,10 @@ class StudentSettle extends React.Component {
             if (student != null) {
                 this.setState({
                     student: student
-                    // id: student.id,
-                    // lastName: student.lastName,
-                    // firstName: student.firstName,
-                    // idCardNr: student.idCardNr,
-                    // telNr: student.telNr,
-                    // paymentStatus: student.paymentStatus,
-                    // lessonHours: student.lessonHours,
-                    // unpaidLessons: student.unpaidLessons,
-                    // moneyOwing: student.moneyOwing,
-                    // moneyInAdvance: student.moneyInAdvance
                 });
             }
         }, 1000);
     };
-
-
-    // lessonStatusChange = (lesson, newStatus) => {
-    //     lesson.status = newStatus;
-    //     this.props.updateLesson(lesson);
-    //     this.props.fetchAllLessonsForStudent(+this.props.match.params.id, this.props.lesson.currentPage, this.state.lessonsPerPage);
-    // }
 
     settleChange = event => {
 
@@ -218,7 +199,6 @@ class StudentSettle extends React.Component {
                     nrStudents: studentLessons[i].nrStudents,
                     status: "Finished_Paid"
                 };
-                //  console.log(lesson);
                 this.props.updateLesson(lesson);
             }
         }
@@ -227,8 +207,7 @@ class StudentSettle extends React.Component {
             var newMoneyInAdvance = -this.state.totalPrice;
             var newPaymentStatus = "We_Owe";
         }
-        //let newStudentStatus = "We_Owe"
-        // Owes_Us
+
         else {
             var newMoneyInAdvance = 0;
             var newPaymentStatus = "Settled"
@@ -247,7 +226,6 @@ class StudentSettle extends React.Component {
             moneyOwing: this.props.student.student.moneyOwing,
             moneyInAdvance: newMoneyInAdvance
         };
-        // console.log(student);
 
 
         this.props.updateStudent(student);
@@ -272,32 +250,13 @@ class StudentSettle extends React.Component {
     }
 
     render() {
-        const searchedLesson = this.props.lesson.searchedLesson;
-        const totalPages = this.props.lesson.totalPages;
-        const totalElements = this.props.lesson.totalElements;
-        const lesson = this.props.lesson;
         const lessons = this.props.lessons;
-        const currentPage = this.props.lesson.currentPage;
         const student = this.props.student.student;
-        const { moneyInAdvance, unpaidLessons, paymentStatus, lessonHours } = this.props.student.student;
+        const { moneyInAdvance, unpaidLessons, lessonHours } = this.props.student.student;
         const priceTables = this.props.priceTable.priceTables;
-        const { priceTable, priceOneH, discount, totalPrice, payForHowMany, howMany1p, howMany2p, howMany3p, customPrice } = this.state;
+        const { priceTable, discount, totalPrice, howMany1p, howMany2p, howMany3p, customPrice } = this.state;
 
-        const pageNumCss = {
-            width: "45px",
-            border: "1px solid #F8F8FF",
-            color: "#F8F8FF",
-            textAlign: "center",
-            fontWeight: "bold"
-        };
 
-        const searchBoxCss = {
-            width: "100px",
-            border: "1px solid #17A2B8",
-            color: "#17A2B8",
-            textAlign: "center",
-            fontWeight: "bold"
-        };
 
         return (
             <div>

@@ -1,25 +1,23 @@
 import React from 'react';
-import logo from './logo.svg';
+import { Col, Container, Row } from 'react-bootstrap';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import './App.css';
-import { Container, Row, Col } from 'react-bootstrap';
-import NavigationBar from './components/NavigationBar';
-import Footer from './components/Footer';
-import Welcome from './components/Welcome';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-
-
-
-import Student from './components/Student/Student';
-import StudentList from './components/Student/StudentList';
 import Instructor from './components/Instructor/Instructor';
 import InstructorList from './components/Instructor/InstructorList';
+import InstructorSettle from './components/Instructor/InstructorSettle';
 import Lesson from './components/Lesson/Lesson';
 import LessonList from './components/Lesson/LessonList';
 import Schedule from './components/Lesson/Schedule';
+import NavigationBar from './components/NavigationBar';
 import PriceTable from './components/PriceTable/PriceTable';
 import PriceTableList from './components/PriceTable/PriceTableList';
+import Student from './components/Student/Student';
+import StudentList from './components/Student/StudentList';
 import StudentSettle from './components/Student/StudentSettle';
-import InstructorSettle from './components/Instructor/InstructorSettle';
+import Welcome from './components/Welcome';
+
+
+
 
 
 
@@ -31,7 +29,7 @@ export default function App() {
   };
 
   const heading = "Surf School App";
-  const footer = "In progress";
+  const footer = "App created for easier surfing school management";
 
   return (
     <Router>
@@ -63,7 +61,6 @@ export default function App() {
           </Col>
         </Row>
       </Container>
-      {/*<Footer />*/}
     </Router>
   );
 }

@@ -1,16 +1,14 @@
-import React from 'react';
-
-import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { Card, Table, ButtonGroup, Button, InputGroup, FormControl } from 'react-bootstrap';
+import { faCalendarPlus, faCheckSquare, faEdit, faFastBackward, faFastForward, faSearch, faStepBackward, faStepForward, faTimes, faTrash, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUsers, faWallet, faEdit, faTrash, faCalendarPlus, faStepBackward, faFastBackward, faStepForward, faFastForward, faSearch, faTimes, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
-import SuccessToast from '../SuccessToast';
-
+import React from 'react';
+import { Button, ButtonGroup, Card, FormControl, InputGroup, Table } from 'react-bootstrap';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { deleteLesson, fetchAllLessons, searchLessons, updateLesson } from './../../services/index';
-
 import './../../style/Style.css';
+
+
+
 
 
 class LessonList extends React.Component {
@@ -75,7 +73,6 @@ class LessonList extends React.Component {
         if (this.props.lesson.searchedLesson) {
             this.searchLesson(target)
         } else {
-            let sortDirection = this.state.sortToggle ? "asc" : "desc";
             this.props.fetchAllLessons(target, this.state.lessonsPerPage, this.props.lesson.sortDirection);
         }
         this.setState({
@@ -92,7 +89,6 @@ class LessonList extends React.Component {
             if (this.props.lesson.searchedLesson) {
                 this.searchLesson(this.props.lesson.currentPage)
             } else {
-                let sortDirection = this.state.sortToggle ? "asc" : "desc";
                 this.props.fetchAllLessons(this.props.lesson.currentPage, this.state.lessonsPerPage, this.props.lesson.sortDirection);
             }
         }
@@ -104,14 +100,12 @@ class LessonList extends React.Component {
             if (this.props.lesson.searchedLesson) {
                 this.searchLesson(this.props.lesson.currentPage)
             } else {
-                let sortDirection = this.state.sortToggle ? "asc" : "desc";
                 this.props.fetchAllLessons(this.props.lesson.currentPage, this.state.lessonsPerPage, this.props.lesson.sortDirection);
             }
         }
     };
 
     lastPage = () => {
-        let lessonsLength = this.state.lessons.length;
         let lastPage = Math.ceil(this.props.totalElements / this.state.lessonsPerPage);
         if (this.props.lesson.currentPage < lastPage) {
             this.props.lesson.currentPage = lastPage;
@@ -130,7 +124,6 @@ class LessonList extends React.Component {
             if (this.props.lesson.searchedLesson) {
                 this.searchLesson(this.props.lesson.currentPage)
             } else {
-                let sortDirection = this.state.sortToggle ? "asc" : "desc";
                 this.props.fetchAllLessons(this.props.lesson.currentPage, this.state.lessonsPerPage, this.props.lesson.sortDirection);
             }
         }
@@ -156,10 +149,6 @@ class LessonList extends React.Component {
 
     }
 
-    searchLesson = (currentPage) => {
-        if (this.props.lesson.searchedLesson)
-            this.props.searchLessons(this.props.lesson.searchedLesson, this.props.lesson.currentPage, this.props.lesson.lessonsPerPage);
-    }
 
 
     lessonStatusChange = (lesson, newStatus) => {
@@ -173,11 +162,8 @@ class LessonList extends React.Component {
     render() {
         const searchedLesson = this.props.lesson.searchedLesson;
         const totalPages = this.props.lesson.totalPages;
-        const totalElements = this.props.lesson.totalElements;
-        const lesson = this.props.lesson;
         const lessons = this.props.lessons;
         const currentPage = this.props.lesson.currentPage;
-        const sortDirection = this.props.lesson.sortDirection;
 
         const pageNumCss = {
             width: "45px",
@@ -207,20 +193,7 @@ class LessonList extends React.Component {
                             <FontAwesomeIcon icon={faUsers} />     Lessons List
                         </div>
 
-                        <div style={{ "float": "right" }}>
-                            <InputGroup size="sm">
-                                <FormControl style={searchBoxCss} className={"bg-dark"} name="searchedLesson" value={searchedLesson} placeholder="Search"
-                                    onChange={this.searchChange} />
-                                <InputGroup.Append>
-                                    <Button size="sm" variant="outline-info" type="button" onClick={this.searchLesson}>
-                                        <FontAwesomeIcon icon={faSearch} />
-                                    </Button>
-                                    <Button size="sm" variant="outline-danger" type="button" onClick={this.cancelSearch}>
-                                        <FontAwesomeIcon icon={faTimes} />
-                                    </Button>
-                                </InputGroup.Append>
-                            </InputGroup>
-                        </div>
+                      
 
                     </Card.Header>
                     <Card.Body>

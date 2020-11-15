@@ -1,16 +1,16 @@
-import React from 'react';
-
-import { Link } from 'react-router-dom';
-import { Alert, Card, Table, ButtonGroup, Button, InputGroup, FormControl } from 'react-bootstrap';
+import { faEdit, faFastBackward, faFastForward, faSearch, faStepBackward, faStepForward, faTimes, faTrash, faUserPlus, faUsers, faWallet } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUsers, faWallet, faEdit, faTrash, faUserPlus, faStepBackward, faFastBackward, faStepForward, faFastForward, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
+import React from 'react';
+import { Button, ButtonGroup, Card, FormControl, InputGroup, Table } from 'react-bootstrap';
+import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import SuccessToast from '../SuccessToast';
-
+import { deleteStudent, fetchAllStudents, searchStudents } from './../../services/index';
 import './../../style/Style.css';
 
 
-import { connect } from 'react-redux';
-import { deleteStudent, fetchAllStudents, searchStudents } from './../../services/index';
+
+
 
 class StudentList extends React.Component {
 
@@ -52,7 +52,6 @@ class StudentList extends React.Component {
         if (this.props.student.searchedStudent) {
             this.searchStudent(target)
         } else {
-            let sortDirection = this.state.sortToggle ? "asc" : "desc";
             this.props.fetchAllStudents(target, this.state.studentsPerPage, this.props.student.sortDirection, null);
         }
         this.setState({
@@ -69,7 +68,6 @@ class StudentList extends React.Component {
             if (this.props.student.searchedStudent) {
                 this.searchStudent(this.props.student.currentPage)
             } else {
-                let sortDirection = this.state.sortToggle ? "asc" : "desc";
                 this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, null);
             }
         }
@@ -81,14 +79,12 @@ class StudentList extends React.Component {
             if (this.props.student.searchedStudent) {
                 this.searchStudent(this.props.student.currentPage)
             } else {
-                let sortDirection = this.state.sortToggle ? "asc" : "desc";
                 this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, null);
             }
         }
     };
 
     lastPage = () => {
-        let studentsLength = this.state.students.length;
         let lastPage = Math.ceil(this.props.totalElements / this.state.studentsPerPage);
         if (this.props.student.currentPage < lastPage) {
             this.props.student.currentPage = lastPage;
@@ -107,7 +103,6 @@ class StudentList extends React.Component {
             if (this.props.student.searchedStudent) {
                 this.searchStudent(this.props.student.currentPage)
             } else {
-                let sortDirection = this.state.sortToggle ? "asc" : "desc";
                 this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, null);
             }
         }
@@ -125,18 +120,15 @@ class StudentList extends React.Component {
     };
 
     sortData = () => {
-       // console.log(this.props.student.sortDirection);
         if (this.props.student.sortDirection === "asc")
             this.props.student.sortDirection = "desc";
         else
             this.props.student.sortDirection = "asc";
-         //   console.log(this.props.student.sortDirection);
-
         this.props.fetchAllStudents(this.props.student.currentPage, this.state.studentsPerPage, this.props.student.sortDirection, null);
 
     }
 
-    searchStudent = (currentPage) => {
+    searchStudent = () => {
         if (this.props.student.searchedStudent)
             this.props.searchStudents(this.props.student.searchedStudent, this.props.student.currentPage, this.props.student.studentsPerPage);
     }
@@ -144,8 +136,6 @@ class StudentList extends React.Component {
     render() {
         const searchedStudent = this.props.student.searchedStudent;
         const totalPages = this.props.student.totalPages;
-        const totalElements = this.props.student.totalElements;
-        const student = this.props.student;
         const students = this.props.students;
         const currentPage = this.props.student.currentPage;
         const sortDirection = this.props.student.sortDirection;
@@ -218,7 +208,7 @@ class StudentList extends React.Component {
                                         <td colSpan="10"> No Students in the Data Base</td>
                                     </tr> :
 
-                                    students.map((student, index) => (
+                                    students.map((student) => (
                                         <tr key={student.id}>
                                             <td>{student.lastName}</td>
                                             <td>{student.firstName}</td>

@@ -1,11 +1,11 @@
-import React from 'react';
-import { Form, Card, Col, Button } from 'react-bootstrap';
-import { faSave, faUndo, faArrowLeft, faEdit, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faEdit, faPlusSquare, faSave, faUndo } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React from 'react';
+import { Button, Card, Col, Form } from 'react-bootstrap';
+import { connect } from 'react-redux';
+import { fetchStudent, saveStudent, updateStudent } from '../../services/index';
 import SuccessToast from '../SuccessToast';
 
-import { connect } from 'react-redux';
-import { saveStudent, fetchStudent, updateStudent } from '../../services/index';
 
 class Student extends React.Component {
 
@@ -128,7 +128,7 @@ class Student extends React.Component {
     };
 
     render() {
-        const { firstName, lastName, idCardNr, telNr, paymentStatus, lessonHours, unpaidLessons, moneyOwing, moneyInAdvance } = this.state;
+        const { firstName, lastName, idCardNr, telNr, moneyInAdvance } = this.state;
         return (
             <div>
                 <div style={{ "display": this.state.show ? "block" : "none" }}>
@@ -243,9 +243,6 @@ class Student extends React.Component {
 
 const mapStateToProps = state => {
     return {
-        //savedStudentObject: state.student,
-        //      studentObject: state.student,
-        //  updatedStudent: state.student.student
         student: state.student
     };
 };

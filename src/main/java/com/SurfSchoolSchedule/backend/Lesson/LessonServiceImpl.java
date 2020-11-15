@@ -22,26 +22,9 @@ public class LessonServiceImpl implements LessonService<Lesson> {
         Page<Lesson> allElementsPage = lessonRepository.findAll(pageable);
         List<Lesson> allElementsList = allElementsPage.getContent();
 
-//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM-dd-yyyy");
-//        LocalDateTime now = LocalDateTime.now();
-//        System.out.println(now);
-
         for (Lesson lesson : allElementsList) {
             if(lesson.getStatus() == Lesson.Status.Not_Given)
                 deleteLesson(lesson.getId());
-
-//            String tempDate[] = lesson.getDate().split("-");
-//            StringBuffer sb = new StringBuffer();
-//            for (int i = 0; i < tempDate.length; ++i) {
-//                if (tempDate[i].length() == 1)
-//                    tempDate[i] = "0".concat(tempDate[i]);
-//                sb.append(tempDate[i]);
-//                if( i != tempDate.length - 1)
-//                    sb.append("-");
-//            }
-//            String date = sb.toString();
-//            LocalDateTime tempLocalDateTime = LocalDateTime.parse(date);
-//            System.out.println(tempLocalDateTime);
         }
 
         return allElementsPage;
@@ -101,16 +84,13 @@ public class LessonServiceImpl implements LessonService<Lesson> {
 
     }
 
-    private boolean noLessonAtThisHour(Pageable pageable, Lesson newLesson/*, boolean hasId*/) {
-//        return lessonRepository.alreadyExists(pageable, newLesson.getStudent().getId(), newLesson.getInstructor().getId(),
-//                newLesson.getDate(), newLesson.getTime()).isEmpty();
+    private boolean noLessonAtThisHour(Pageable pageable, Lesson newLesson) {
         double newLessonLength = newLesson.getHowLong();
         boolean noLessons = true;
         for (int i = 0; i < newLessonLength; ++i) {
             int hourInt = Integer.parseInt(newLesson.getTime().split(":")[0]);
             hourInt+=i;
             String hourString = Integer.toString(hourInt) + ":00";
-          //  if(hasId){
             if (!lessonRepository.alreadyExists(pageable, newLesson.getStudent().getId(), newLesson.getInstructor().getId(),
                     newLesson.getDate(), hourString, newLesson.getId()).isEmpty()) {
                 System.out.println(newLesson.getId());
@@ -121,7 +101,6 @@ public class LessonServiceImpl implements LessonService<Lesson> {
         return noLessons;
 
 
-        // return lessonRepository.search(pageable, newLesson.getLesson().getFirstName().concat(" ".concat(newLesson.getLesson().getLastName())), , newLesson.getFirstName().concat(" ".concat(newLesson.getLastName()))) != null;
     }
 //check if e.g. lesson that started two hors earlier doesn't coincide with newLesson
     private boolean noCoincidingLessonsInEarlierHours(Pageable pageable, Lesson newLesson) {

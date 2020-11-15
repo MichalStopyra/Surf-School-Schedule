@@ -1,16 +1,12 @@
-import React from 'react';
-import { Form, Card, Col, Button, Modal } from 'react-bootstrap';
-import { faSave, faUndo, faArrowLeft, faEdit, faPlusSquare, faLanguage } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faEdit, faPlusSquare, faSave, faUndo } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
-import moment from 'moment';
-import SuccessToast from '../SuccessToast';
-import Instructor from '../Instructor/Instructor';
-import Student from '../Student/Student';
-
+import React from 'react';
+import { Button, Card, Col, Form, Modal } from 'react-bootstrap';
 import { connect } from 'react-redux';
-import { saveLesson, fetchLesson, updateLesson, fetchAllInstructors, fetchAllStudents } from '../../services/index';
+import { fetchAllInstructors, fetchAllStudents, fetchLesson, saveLesson, updateLesson } from '../../services/index';
+import SuccessToast from '../SuccessToast';
+
 
 class Lesson extends React.Component {
 
@@ -47,7 +43,7 @@ class Lesson extends React.Component {
 
 
     arrayWithHours() {
-        var arr = [], i, j;
+        var arr = [], i;
         for (i = 9; i < 21; i++) {
             arr.push(i + ":00");
         }
@@ -260,7 +256,6 @@ class Lesson extends React.Component {
         };
 
         this.props.updateLesson(lesson);
-//        this.forceUpdate();//?????????????????????????
         setTimeout(() => {
 
             if (!this.props.lesson.error) {
@@ -320,7 +315,7 @@ class Lesson extends React.Component {
                 time: this.props.editedLesson.time,
                 status: this.props.editedLesson.status,
             });
-            this.findAllStudents(this.props.editedLesson.student);//musze dac booleana
+            this.findAllStudents(this.props.editedLesson.student);
             this.props.student.students[0] = this.props.editedLesson.student;
 
         }
@@ -328,12 +323,11 @@ class Lesson extends React.Component {
 
     resetAndCloseForm = () => {
         this.resetForm();
-        this.props.handleClose(false/*, null, null, null, null, true*/);
+        this.props.handleClose(false);
     }
 
     render() {
-        const { student, time, howLong, nrStudents } = this.state;
-        const instructors = this.props.instructor.instructors;
+        const { student, howLong, nrStudents } = this.state;
         const students = this.props.student.students;
 
         return (
@@ -460,9 +454,6 @@ class Lesson extends React.Component {
 }
 const mapStateToProps = state => {
     return {
-        //savedStudentObject: state.student,
-        //      studentObject: state.student,
-        //  updatedStudent: state.student.student
         lesson: state.lesson,
         student: state.student
     };

@@ -1,20 +1,18 @@
-import React from 'react';
-
-import axios from 'axios';
-import { Link } from 'react-router-dom';
-
-import { Card, Table, ButtonGroup, Button, InputGroup, FormControl } from 'react-bootstrap';
+import { faArrowLeft, faArrowRight, faCalendarAlt, faCalendarPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faTimes , faArrowLeft, faArrowRight, faCalendarPlus} from '@fortawesome/free-solid-svg-icons';
-import SuccessToast from '../SuccessToast';
-import Popover from '../Popover';
+import axios from 'axios';
+import React from 'react';
+import { Button, ButtonGroup, Card, Table } from 'react-bootstrap';
+import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { deleteLesson, updateLesson } from '../../services/index';
+import './../../style/Style.css';
 import InstructorDay from './InstructorDay';
 import LessonForm from './LessonForm';
 
-import './../../style/Style.css';
 
-import { connect } from 'react-redux';
-import { updateLesson, deleteLesson } from '../../services/index';
+
+
 
 
 
@@ -26,7 +24,7 @@ class Schedule extends React.Component {
         this.state = {
             date: today.getMonth() + 1 + '-' + today.getDate() + '-' + today.getFullYear(),
             dayName: today.toLocaleString('en-us', {weekday: 'long'}),
-            instructor: 'khjghgxchgvjh',
+            instructor: '',
             lessonHour: '',
             instructors: [],
             lessons: [],
@@ -40,7 +38,6 @@ class Schedule extends React.Component {
             instrIndex: '',
             editedLesson: ''
         };
-        // this.getFieldColor = this.getFieldColor.bind(this);
 
     }
 
@@ -198,7 +195,6 @@ class Schedule extends React.Component {
                     instructorDay: tempTab
                 });
 
-                //this.findAllInstructorsAndSchedules(this.state.date);
                 return;
             }
             if (newLessonWasAdded) {
@@ -217,7 +213,6 @@ class Schedule extends React.Component {
                 this.setState({
                     instructorDay: tempTab
                 });
-                //this.findAllInstructorsAndSchedules(this.state.date);
             }
             return;
         }
@@ -260,7 +255,7 @@ class Schedule extends React.Component {
     }
 
     render() {
-        const { instructorDay, instructors } = this.state;
+        const { instructorDay } = this.state;
         return (
             <div>
                 <LessonForm instructor={this.state.instructor} lessonHour={this.state.lessonHour} date={this.state.date}
@@ -272,9 +267,9 @@ class Schedule extends React.Component {
                     <Card.Header>
                         <div id="container" style={{"clear":"both", "display": "flex", "justifyContent":"space-between"}}>
                         <div style={{ "textAlign": "center"}} >
-                        <Button variant="outline-light" onClick={(addedDays)=>this.changeDate(-1)} > <FontAwesomeIcon icon={faArrowLeft} /> </Button>{'  '}
+                        <Button variant="outline-light" onClick={()=>this.changeDate(-1)} > <FontAwesomeIcon icon={faArrowLeft} /> </Button>{'  '}
                             <FontAwesomeIcon icon={faCalendarAlt} />   {this.state.dayName} {this.state.date}{' '}
-                            <Button variant="outline-light" onClick={(addedDays)=>this.changeDate(1)}  > <FontAwesomeIcon icon={faArrowRight} /> </Button>
+                            <Button variant="outline-light" onClick={()=>this.changeDate(1)}  > <FontAwesomeIcon icon={faArrowRight} /> </Button>
                         </div>
                         <div style={{ "textAlign": "right"}}>
                         <Link to={"add-lesson"} className="nav-link">
@@ -335,9 +330,6 @@ class Schedule extends React.Component {
 
 const mapStateToProps = state => {
     return {
-        //savedStudentObject: state.student,
-        //      studentObject: state.student,
-        //  updatedStudent: state.student.student
         lesson: state.lesson,
     };
 };

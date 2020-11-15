@@ -66,7 +66,6 @@ public class WeekInstructorServiceImpl implements WeekInstructorService<WeekInst
 
         List<WeekInstructor> weekInstructorList = weekInstructorPage.getContent();
 
-        // LocalDate today = LocalDate.now();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM-dd-yyyy");
         LocalDate dateLocalDate = LocalDate.parse(date, fmt);
 
@@ -81,7 +80,6 @@ public class WeekInstructorServiceImpl implements WeekInstructorService<WeekInst
             }
         }
         return rightWeekInstructor;
-        //return weekInstructorRepository.getWeekInstructorForInstructorForGivenDate(pageable, instructorId, date);
     }
 
 

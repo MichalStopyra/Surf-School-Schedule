@@ -1,5 +1,5 @@
-import Popover from '../Popover';
 import React from 'react';
+import Popover from '../Popover';
 
 class InstructorDay extends React.Component {
 

@@ -12,9 +12,9 @@ export default function NavigationBar() {
                 <Link to={"/students"} className="nav-link">Students</Link>
                 <Link to={"/instructors"} className="nav-link">Instructors</Link>
                 <Link to={"/schedule"} className="nav-link">Schedule</Link>
+                <Link to={"/lessons"} className="nav-link">Lessons List</Link>
                 <Link to={"/priceTableList"} className="nav-link">PriceTable</Link>
 
-                <Link to={"/lessons"} className="nav-link">Lessons</Link>
 
             </Nav>
 

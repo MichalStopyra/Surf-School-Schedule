@@ -52,7 +52,6 @@ public class Student extends AbstractEntity {
     @JsonIgnore
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
-    //@JoinColumn (name ="FK_Lesson")
     private List<Lesson> lessons = new LinkedList<>();
 
     public String getFirstName() {
