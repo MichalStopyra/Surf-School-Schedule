@@ -56,34 +56,6 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 
-			<plugin>
-				<groupId>com.microsoft.azure</groupId>
-				<artifactId>azure-webapp-maven-plugin</artifactId>
-				<version>1.7.0</version>
-				<configuration>
-					<schemaVersion>v2</schemaVersion>
-					<resourceGroup>maven-plugin</resourceGroup>
-					<appName>Spring-App</appName>
-					<region>East US</region>
-					<runtime>
-						<os>linux</os>
-						<javaVersion>jre8</javaVersion>
-						<webContainer></webContainer>
-					</runtime>
-					<deployment>
-						<resources>
-							<resource>
-								<directory>${project.basedir}/target</directory>
-								<includes>
-									<include>*.jar</include>
-								</includes>
-							</resource>
-						</resources>
-					</deployment>
-					<pricingTier>F1</pricingTier>
-				</configuration>
-			</plugin>
-
 		</plugins>
 
 
