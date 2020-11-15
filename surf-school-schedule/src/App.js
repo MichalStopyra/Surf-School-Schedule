@@ -19,6 +19,8 @@ import Schedule from './components/Lesson/Schedule';
 import PriceTable from './components/PriceTable/PriceTable';
 import PriceTableList from './components/PriceTable/PriceTableList';
 import StudentSettle from './components/Student/StudentSettle';
+import InstructorSettle from './components/Instructor/InstructorSettle';
+
 
 
 
@@ -45,7 +47,7 @@ export default function App() {
               <Route path="/editStudent/:id" exact component={Student} />
               <Route path="/settleStudent/:id" exact component={StudentSettle} />
               <Route path="/editInstructor/:id" exact component={Instructor} />
-              <Route path="/settleInstructor/:id" exact component={Instructor} />
+              <Route path="/settleInstructor/:id" exact component={InstructorSettle} />
               <Route path="/lessons" exact component={LessonList} />
               <Route path="/add-lesson" exact component={Lesson} />
               <Route path="/editLesson/:id" exact component={Lesson} />

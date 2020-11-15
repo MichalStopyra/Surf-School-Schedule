@@ -1,13 +1,18 @@
 package com.SurfSchoolSchedule.backend.Instructor;
 
 import com.SurfSchoolSchedule.backend.Lesson.LessonRepository;
+import com.SurfSchoolSchedule.backend.WeekInstructor.WeekInstructor;
+import com.SurfSchoolSchedule.backend.WeekInstructor.WeekInstructorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -20,14 +25,38 @@ public class InstructorServiceImpl implements InstructorService<Instructor> {
     @Autowired
     LessonRepository lessonRepository;
 
+    @Autowired
+    WeekInstructorService<WeekInstructor> weekInstructorService;
+
     @Transactional
     @Override
     public Page<Instructor> getAll(Pageable pageable) {
         Page<Instructor> allElementsPage = instructorRepository.findAll(pageable);
         List<Instructor> allElementsList = allElementsPage.getContent();
 
+        LocalDate today = LocalDate.now();
+        //DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM-dd-yyyy");
+
+        Sort tempSort = Sort.by(Sort.Order.desc("beginningDate"));
+        Pageable tempPageable = PageRequest.of(
+                0, 999999999, tempSort);
         for (Instructor instructor : allElementsList) {
             setFullNrOfLessonsForInstructor(instructor.getId());
+
+            WeekInstructor tempWeekInstructor = weekInstructorService.getWeekInstructorForInstructorForGivenDate(tempPageable, instructor.getId(),
+                    today.format(DateTimeFormatter.ofPattern("MM-dd-yyyy")));
+
+            if (tempWeekInstructor == null) {
+                WeekInstructor newWeekInstructor = new WeekInstructor();
+                weekInstructorService.setValues(tempPageable, newWeekInstructor, instructor);
+                weekInstructorService.setStatus(tempPageable, newWeekInstructor, WeekInstructor.Status.Not_Settled);
+
+                weekInstructorService.addNewWeekInstructor(tempPageable, newWeekInstructor);
+
+            } else
+                weekInstructorService.setValues(pageable, tempWeekInstructor, instructor);
+                weekInstructorService.setStatus(tempPageable, tempWeekInstructor, tempWeekInstructor.getStatus() );
+
         }
         return allElementsPage;
     }

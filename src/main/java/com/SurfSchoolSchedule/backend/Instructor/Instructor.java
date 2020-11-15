@@ -41,6 +41,8 @@ public class Instructor extends AbstractEntity {
     @PrimaryKeyJoinColumn
     private List<WeekInstructor> weekInstructorList = new LinkedList<>();
 
+
+
     public String getFirstName() {
         return firstName;
     }

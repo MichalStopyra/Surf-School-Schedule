@@ -12,11 +12,6 @@ public interface WeekInstructorRepository  extends PagingAndSortingRepository<We
             "where  wi.instructor.id = :instructorId")
     Page<WeekInstructor> getAllWeekInstructorForInstructor(Pageable pageable, @Param("instructorId") Long instructorId);
 
-//    @Query("select wi from WeekInstructor wi " +
-//            "where  wi.instructor.id = :instructorId and " +
-//            "wi.endDate like :date")
-//    Page<WeekInstructor> getWeekInstructorForInstructorForGivenDate(Pageable pageable, @Param("instructorId") Long instructorId, @Param("date") String date);
-
     @Query("select wi from WeekInstructor wi " +
             "where  wi.instructor.id = :instructorId and wi.beginningDate = :beginningDate and wi.endDate = :endDate")
     Page<WeekInstructor> weekInstructorDoesNotExist(Pageable pageable, @Param("instructorId") Long instructorId, @Param("beginningDate") String beginningDate, @Param("endDate") String endDate);

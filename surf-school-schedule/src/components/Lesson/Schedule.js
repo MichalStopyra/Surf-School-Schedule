@@ -108,7 +108,6 @@ class Schedule extends React.Component {
         for (let i = 0; i < this.state.lessons.length; ++i) {
             let temp = new Date(this.state.lessons[i].date);
             if (this.state.lessons[i].status === "To_Give" && temp < today) {
-                console.log("asd");
                 this.lessonStatusChange(this.state.lessons[i], 3)
             }
         }

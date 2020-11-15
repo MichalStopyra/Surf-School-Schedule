@@ -1,10 +1,13 @@
 package com.SurfSchoolSchedule.backend.WeekInstructor;
 
+import com.SurfSchoolSchedule.backend.Instructor.Instructor;
 import com.SurfSchoolSchedule.backend.Lesson.Lesson;
 import com.SurfSchoolSchedule.backend.Lesson.LessonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -33,7 +36,7 @@ public class WeekInstructorServiceImpl implements WeekInstructorService<WeekInst
         List<WeekInstructor> allElementsList = allElementsPage.getContent();
 
         for (WeekInstructor weekInstructor : allElementsList) {
-            setValues(pageable, weekInstructor);
+            setValues(pageable, weekInstructor, weekInstructor.getInstructor());
         }
 
         return allElementsPage;
@@ -55,23 +58,29 @@ public class WeekInstructorServiceImpl implements WeekInstructorService<WeekInst
 
     @Override
     public WeekInstructor getWeekInstructorForInstructorForGivenDate(Pageable pageable, Long instructorId, String date) {
+
         WeekInstructor rightWeekInstructor = null;
+
+
         Page<WeekInstructor> weekInstructorPage = weekInstructorRepository.getAllWeekInstructorForInstructor(pageable, instructorId);
+
         List<WeekInstructor> weekInstructorList = weekInstructorPage.getContent();
 
-        LocalDate today = LocalDate.now();
+        // LocalDate today = LocalDate.now();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM-dd-yyyy");
+        LocalDate dateLocalDate = LocalDate.parse(date, fmt);
+
 
         for (WeekInstructor weekInstructor : weekInstructorList) {
             LocalDate monday = LocalDate.parse(weekInstructor.getBeginningDate(), fmt);
             LocalDate sunday = LocalDate.parse(weekInstructor.getEndDate(), fmt);
 
-            if (isInDateRange(monday, sunday, today)) {
+            if (isInDateRange(monday, sunday, dateLocalDate)) {
                 rightWeekInstructor = weekInstructor;
                 break;
             }
         }
-            return rightWeekInstructor;
+        return rightWeekInstructor;
         //return weekInstructorRepository.getWeekInstructorForInstructorForGivenDate(pageable, instructorId, date);
     }
 
@@ -102,23 +111,26 @@ public class WeekInstructorServiceImpl implements WeekInstructorService<WeekInst
     @Override
     public void updateWeekInstructor(Pageable pageable, WeekInstructor weekInstructor, long id) {
         if (sameWeekInstructorDoesNotExist(pageable, weekInstructor)) {
-            WeekInstructor l = weekInstructorRepository.findById(id).get();
-            l.setAllFormValues(weekInstructor);
+            System.out.println(id);
+            WeekInstructor wi = weekInstructorRepository.findById(id).get();
+            wi.setAllFormValues(weekInstructor);
         } else
             throw new RuntimeException("Can't update weekInstructor - already in the dataBase");
 
     }
 
     private boolean sameWeekInstructorDoesNotExist(Pageable pageable, WeekInstructor weekInstructor) {
-        return weekInstructorRepository.sameWeekInstructorDoesNotExist(pageable, weekInstructor.getInstructor().getId(), weekInstructor.getBeginningDate(),
-                weekInstructor.getEndDate(), weekInstructor.getId()).isEmpty();
+        return (weekInstructorRepository.sameWeekInstructorDoesNotExist(pageable, weekInstructor.getInstructor().getId(), weekInstructor.getBeginningDate(),
+                weekInstructor.getEndDate(), weekInstructor.getId()).isEmpty());
     }
 
     @Override
-    public void setValues(Pageable pageable, WeekInstructor weekInstructor) {
+    public void setValues(Pageable pageable, WeekInstructor weekInstructor, Instructor instructor) {
+        weekInstructor.setInstructor(instructor);
         setDates(weekInstructor);
         setNrOfLessons(pageable, weekInstructor);
-        setWeekWageAndStatusToNotSettled(weekInstructor);
+        setWeekWage(weekInstructor);
+
 
     }
 
@@ -138,8 +150,14 @@ public class WeekInstructorServiceImpl implements WeekInstructorService<WeekInst
         String beginningDate = weekInstructor.getBeginningDate();
         String endDate = weekInstructor.getEndDate();
 
-        Page<Lesson> allInstructorLessonsPage = lessonRepository.getAllInstructorLessons(pageable, weekInstructor.getInstructor().getId());
+
+        Sort tempSort = Sort.by(Sort.Order.desc("status"));
+        Pageable tempPageable = PageRequest.of(
+                0, 999999999, tempSort);
+        Page<Lesson> allInstructorLessonsPage = lessonRepository.getAllInstructorLessons(tempPageable, weekInstructor.getInstructor().getId());
+
         List<Lesson> allInstructorLessonsList = allInstructorLessonsPage.getContent();
+
 
         double countLessons1p = 0;
         double countLessons2p = 0;
@@ -149,7 +167,7 @@ public class WeekInstructorServiceImpl implements WeekInstructorService<WeekInst
 
         List<Lesson> instructorWeekLessons = new ArrayList<>();
         for (Lesson lesson : allInstructorLessonsList) {
-            if (lessonInDateRange(lesson, weekInstructor)) {
+            if (lessonInDateRange(lesson, weekInstructor) && lesson.getStatus() != Lesson.Status.Not_Given && lesson.getStatus() != Lesson.Status.To_Give) {
                 instructorWeekLessons.add(lesson);
                 switch (lesson.getNrStudents()) {
                     case 1:
@@ -158,7 +176,7 @@ public class WeekInstructorServiceImpl implements WeekInstructorService<WeekInst
                     case 2:
                         countLessons2p += lesson.getHowLong();
                         break;
-                    case 3:
+                    default:
                         countLessons3p += lesson.getHowLong();
                         break;
                 }
@@ -206,7 +224,7 @@ public class WeekInstructorServiceImpl implements WeekInstructorService<WeekInst
         return correctDate;
     }
 
-    private void setWeekWageAndStatusToNotSettled(WeekInstructor weekInstructor) {
+    private void setWeekWage (WeekInstructor weekInstructor) {
         double weekWage = 0;
         double hourWage = weekInstructor.getInstructor().getHourWage();
 
@@ -215,7 +233,11 @@ public class WeekInstructorServiceImpl implements WeekInstructorService<WeekInst
         weekWage += (hourWage + 10.0) * (weekInstructor.getNrOfLessons3p());
 
         weekInstructor.setWeekWage(weekWage);
-        weekInstructor.setStatus(WeekInstructor.Status.Not_Settled);
+    }
+
+@Override
+public void setStatus(Pageable pageable, WeekInstructor weekInstructor, WeekInstructor.Status status) {
+        weekInstructor.setStatus(status);
     }
 
 

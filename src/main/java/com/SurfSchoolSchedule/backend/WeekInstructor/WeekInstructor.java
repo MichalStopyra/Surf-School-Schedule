@@ -116,7 +116,7 @@ public class WeekInstructor extends AbstractEntity {
         this.status = status;
     }
 
-    public void setAllFormValues(com.SurfSchoolSchedule.backend.WeekInstructor.WeekInstructor newWeekInstructor) {
+    public void setAllFormValues(WeekInstructor newWeekInstructor) {
         this.setInstructor(newWeekInstructor.getInstructor());
         this.setBeginningDate(newWeekInstructor.getBeginningDate());
         this.setEndDate(newWeekInstructor.getEndDate());

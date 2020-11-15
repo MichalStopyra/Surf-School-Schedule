@@ -1,5 +1,6 @@
 package com.SurfSchoolSchedule.backend.WeekInstructor;
 
+import com.SurfSchoolSchedule.backend.Instructor.Instructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -20,5 +21,7 @@ public interface WeekInstructorService<T> {
 
     void updateWeekInstructor(Pageable pageable, WeekInstructor weekInstructor, long id);
 
-    public void setValues(Pageable pageable, WeekInstructor weekInstructor);
+    public void setValues(Pageable pageable, WeekInstructor weekInstructor, Instructor instructor);
+    public void setStatus(Pageable pageable, WeekInstructor weekInstructor, WeekInstructor.Status status);
+
 }
