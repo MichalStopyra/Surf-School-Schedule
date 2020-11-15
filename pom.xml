@@ -15,7 +15,6 @@
 	<description>Schedule app for surf schools</description>
 
 	<properties>
-		<java.version>11</java.version>
 	</properties>
 
 	<dependencies>
