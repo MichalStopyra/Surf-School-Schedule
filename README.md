@@ -18,10 +18,10 @@ Functionalities:
 Technologies:
 
   Backend:
-    1. Java, Spring Boot, JPA (H2)
+     Java, Spring Boot, JPA (H2)
 
   Frontend:
-    2. JavaScript, React, ReactBootstrap, Redux
+     JavaScript, React, ReactBootstrap, Redux
     
    ![Screenshot](screenshot.png)
 
