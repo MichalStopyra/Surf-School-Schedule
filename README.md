@@ -2,6 +2,7 @@
 This webapp enables it's user to manage surfing school from the office side
 
 https://surfschoolschedule.netlify.app/
+
 (At first open, App may need to be reloaded a couple of times to print data base elements)
 
 Functionalities:
