@@ -16,8 +16,10 @@ Functionalities:
   7. Settling Students - app counts how many unpaid lessons specific student has to settle. App automaticaly chooses the price due to the price table and nr of lessons, that student has already had. It also lets the user choose another price option and dicount or insert it on their own.
   
 Technologies:
+
   Backend:
     1. Java, Spring Boot, JPA (H2)
+
   Frontend:
     2. JavaScript, React, ReactBootstrap, Redux
     
