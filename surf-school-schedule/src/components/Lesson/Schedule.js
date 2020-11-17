@@ -49,7 +49,7 @@ class Schedule extends React.Component {
     findAllInstructorsAndSchedules(date) {
         var instructors = [];
 
-        axios.get("http://localhost:8080/instructor-api/list?page=0&size=999999999&sortBy=firstName&sortDir=desc")
+        axios.get("https://surf-school-schedule.herokuapp.com/instructor-api/list?page=0&size=999999999&sortBy=firstName&sortDir=desc")
             .then(response => response.data)
             .then((data) => {
                 instructors = data.content;
@@ -63,7 +63,7 @@ class Schedule extends React.Component {
         let tabLength = instructors.length;
         for (let i = 0; i < tabLength; ++i) {
             let instructor = instructors[i]
-            axios.get("http://localhost:8080/lesson-api/" + instructor.id + "/" + date)
+            axios.get("https://surf-school-schedule.herokuapp.com/lesson-api/" + instructor.id + "/" + date)
                 .then(response => {
                     if (response.data != null) {
                         let tempInstrDay = {
@@ -199,7 +199,7 @@ class Schedule extends React.Component {
             }
             if (newLessonWasAdded) {
                 //added lesson doesn't have id so i need to get it from data base
-                axios.get("http://localhost:8080/lesson-api/" + lesson.instructor.id + "/" + lesson.date + "?page=0&size=1&sortBy=id&sortDir=desc")
+                axios.get("https://surf-school-schedule.herokuapp.com/lesson-api/" + lesson.instructor.id + "/" + lesson.date + "?page=0&size=1&sortBy=id&sortDir=desc")
                     .then(response => {
                         lesson.id = response.data.content[0].id;
                     })

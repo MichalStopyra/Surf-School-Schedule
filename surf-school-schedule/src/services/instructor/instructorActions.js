@@ -10,7 +10,7 @@ export const fetchAllInstructors = (currentPage, size, sortDir, addSelect) => {
     --currentPage;
     return dispatch => {
         // dispatch(fetchAllInstructorsRequest());???????????????????????????
-        axios.get("http://localhost:8080/instructor-api/list?page=" + currentPage + "&size=" + size + "&sortBy=paymentStatus&sortDir=" + sortDir)
+        axios.get("https://surf-school-schedule.herokuapp.com/instructor-api/list?page=" + currentPage + "&size=" + size + "&sortBy=paymentStatus&sortDir=" + sortDir)
             .then(response => {
                 if (addSelect)
                 response.data.content.unshift({
@@ -32,7 +32,7 @@ const fetchAllInstructorsRequest = () => {
 
 export const saveInstructor = instructor => {
     return dispatch => {
-        axios.post("http://localhost:8080/instructor-api/list", instructor)
+        axios.post("https://surf-school-schedule.herokuapp.com/instructor-api/list", instructor)
             .then(response => {
                 //  dispatch(instructorSuccess(response.data));
                 dispatch(saveInstructorRequest(instructor));
@@ -60,7 +60,7 @@ const fetchInstructorRequest = updatedInstructor => {
 
 export const fetchInstructor = instructorId => {
     return dispatch => {
-        axios.get("http://localhost:8080/instructor-api/" + instructorId)
+        axios.get("https://surf-school-schedule.herokuapp.com/instructor-api/" + instructorId)
             .then(response => {
                 dispatch(fetchInstructorRequest(response.data));
                 //dispatch(instructorSuccess(response.data.content));
@@ -85,7 +85,7 @@ export const updateInstructor = instructor => {
     //console.log(instructor);
 
     return dispatch => {
-        axios.put("http://localhost:8080/instructor-api/" + instructor.id, instructor)
+        axios.put("https://surf-school-schedule.herokuapp.com/instructor-api/" + instructor.id, instructor)
             .then(response => {
                 dispatch(updateInstructorRequest(instructor));
 
@@ -107,7 +107,7 @@ const deleteInstructorRequest = instructorId => {
 
 export const deleteInstructor = instructorId => {
     return dispatch => {
-        axios.delete("http://localhost:8080/instructor-api/list/" + instructorId)
+        axios.delete("https://surf-school-schedule.herokuapp.com/instructor-api/list/" + instructorId)
             .then(response => {
                 dispatch(deleteInstructorRequest(instructorId));
                 //console.log(response);
@@ -147,7 +147,7 @@ const fetchAllInstructorsSuccess = (instructors, totalPages, totalElements, sort
 export const searchInstructors = (searchedValue, currentPage, instructorsPerPage) => {
     --currentPage;
     return dispatch => {
-        axios.get("http://localhost:8080/instructor-api/search/" + searchedValue + "?page=" + currentPage + "&size=" + instructorsPerPage)
+        axios.get("https://surf-school-schedule.herokuapp.com/instructor-api/search/" + searchedValue + "?page=" + currentPage + "&size=" + instructorsPerPage)
             .then(response => {
                 dispatch(searchInstructorsRequest(response.data.content));
             })

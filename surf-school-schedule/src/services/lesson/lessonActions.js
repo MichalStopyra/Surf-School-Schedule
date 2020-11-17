@@ -10,7 +10,7 @@ export const fetchAllLessons = (currentPage, size, sortDir) => {
     --currentPage;
     return dispatch => {
         // dispatch(fetchAllLessonsRequest());???????????????????????????
-        axios.get("http://localhost:8080/lesson-api/list?page=" + currentPage + "&size=" + size + "&sortBy=status&sortDir=" + sortDir)
+        axios.get("https://surf-school-schedule.herokuapp.com/lesson-api/list?page=" + currentPage + "&size=" + size + "&sortBy=status&sortDir=" + sortDir)
             .then(response => {
                 dispatch(fetchAllLessonsRequest(response.data.content, response.data.totalPages, response.data.totalElements, sortDir));
             })
@@ -32,7 +32,7 @@ const fetchAllLessonsRequest = (lessons, totalPages, totalElements, sortDirectio
 
 export const saveLesson = lesson => {
     return dispatch => {
-        axios.post("http://localhost:8080/lesson-api/list", lesson)
+        axios.post("https://surf-school-schedule.herokuapp.com/lesson-api/list", lesson)
             .then(response => {
                 dispatch(saveLessonRequest(lesson));
             })
@@ -59,7 +59,7 @@ const fetchLessonRequest = updatedLesson => {
 
 export const fetchLesson = lessonId => {
     return dispatch => {
-        axios.get("http://localhost:8080/lesson-api/" + lessonId)
+        axios.get("https://surf-school-schedule.herokuapp.com/lesson-api/" + lessonId)
             .then(response => {
                 dispatch(fetchLessonRequest(response.data));
                 //dispatch(lessonSuccess(response.data.content));
@@ -85,7 +85,7 @@ export const updateLesson = lesson => {
     //console.log(lesson);
 
     return dispatch => {
-        axios.put("http://localhost:8080/lesson-api/" + lesson.id, lesson)
+        axios.put("https://surf-school-schedule.herokuapp.com/lesson-api/" + lesson.id, lesson)
             .then(response => {
                 dispatch(updateLessonRequest(lesson));
 
@@ -107,7 +107,7 @@ const deleteLessonRequest = lessonId => {
 
 export const deleteLesson = lessonId => {
     return dispatch => {
-        axios.delete("http://localhost:8080/lesson-api/list/" + lessonId)
+        axios.delete("https://surf-school-schedule.herokuapp.com/lesson-api/list/" + lessonId)
             .then(response => {
                 dispatch(deleteLessonRequest(lessonId));
                 //console.log(response);
@@ -138,7 +138,7 @@ const lessonFailure = error => {
 export const searchLessons = (searchedValue, currentPage, lessonsPerPage) => {
     --currentPage;
     return dispatch => {
-        axios.get("http://localhost:8080/lesson-api/search/" + searchedValue + "?page=" + currentPage + "&size=" + lessonsPerPage)
+        axios.get("https://surf-school-schedule.herokuapp.com/lesson-api/search/" + searchedValue + "?page=" + currentPage + "&size=" + lessonsPerPage)
             .then(response => {
                 dispatch(searchLessonsRequest(response.data.content));
             })
@@ -160,7 +160,7 @@ export const fetchAllLessonsForStudent = (studentId, currentPage, size) => {
     --currentPage;
     return dispatch => {
         // dispatch(fetchAllLessonsRequest());???????????????????????????
-        axios.get("http://localhost:8080/lesson-api/studentLessons/" + studentId + "?page=" + currentPage + "&size=" + size + "&sortBy=status")
+        axios.get("https://surf-school-schedule.herokuapp.com/lesson-api/studentLessons/" + studentId + "?page=" + currentPage + "&size=" + size + "&sortBy=status")
             .then(response => {
                 dispatch(fetchAllStudentLessonsRequest(response.data.content, response.data.totalPages, response.data.totalElements));
             })

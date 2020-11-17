@@ -10,7 +10,7 @@ export const fetchAllStudents = (currentPage, size, sortDir, addedStudent) => {
     --currentPage;
     return dispatch => {
 
-        axios.get("http://localhost:8080/student-api/list?page=" + currentPage + "&size=" + size + "&sortBy=paymentStatus&sortDir=" + sortDir)
+        axios.get("https://surf-school-schedule.herokuapp.com/student-api/list?page=" + currentPage + "&size=" + size + "&sortBy=paymentStatus&sortDir=" + sortDir)
             .then(response => {
                     if (addedStudent)
                         response.data.content.unshift(
@@ -38,7 +38,7 @@ const fetchAllStudentsRequest = (students, totalPages, totalElements, sortDirect
 
 export const saveStudent = student => {
     return dispatch => {
-        axios.post("http://localhost:8080/student-api/list", student)
+        axios.post("https://surf-school-schedule.herokuapp.com/student-api/list", student)
             .then(response => {
                 dispatch(saveStudentRequest(student));
             })
@@ -65,7 +65,7 @@ const fetchStudentRequest = updatedStudent => {
 
 export const fetchStudent = studentId => {
     return dispatch => {
-        axios.get("http://localhost:8080/student-api/" + studentId)
+        axios.get("https://surf-school-schedule.herokuapp.com/student-api/" + studentId)
             .then(response => {
                 dispatch(fetchStudentRequest(response.data));
                 //dispatch(studentSuccess(response.data.content));
@@ -91,7 +91,7 @@ export const updateStudent = student => {
     //console.log(student);
 
     return dispatch => {
-        axios.put("http://localhost:8080/student-api/" + student.id, student)
+        axios.put("https://surf-school-schedule.herokuapp.com/student-api/" + student.id, student)
             .then(response => {
                 dispatch(updateStudentRequest(student));
 
@@ -113,7 +113,7 @@ const deleteStudentRequest = studentId => {
 
 export const deleteStudent = studentId => {
     return dispatch => {
-        axios.delete("http://localhost:8080/student-api/list/" + studentId)
+        axios.delete("https://surf-school-schedule.herokuapp.com/student-api/list/" + studentId)
             .then(response => {
                 dispatch(deleteStudentRequest(studentId));
                 //console.log(response);
@@ -144,7 +144,7 @@ const studentFailure = error => {
 export const searchStudents = (searchedValue, currentPage, studentsPerPage) => {
     --currentPage;
     return dispatch => {
-        axios.get("http://localhost:8080/student-api/search/" + searchedValue + "?page=" + currentPage + "&size=" + studentsPerPage)
+        axios.get("https://surf-school-schedule.herokuapp.com/student-api/search/" + searchedValue + "?page=" + currentPage + "&size=" + studentsPerPage)
             .then(response => {
                 dispatch(searchStudentsRequest(response.data.content));
             })
