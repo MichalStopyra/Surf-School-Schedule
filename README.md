@@ -21,7 +21,7 @@ Technologies:
   Frontend:
     2. JavaScript, React, ReactBootstrap, Redux
     
-    ![Screenshot](screenshot.png)
+   ![Screenshot](screenshot.png)
 
     
  
