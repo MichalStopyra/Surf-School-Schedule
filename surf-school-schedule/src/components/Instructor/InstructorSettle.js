@@ -35,7 +35,7 @@ class InstructorSettle extends React.Component {
     }
 
     findWeekInstructorTab = (idInstructor) => {
-        axios.get("http://localhost:8080/weekInstructor-api/studentWeekInstructors/" + idInstructor)
+        axios.get("https://surf-school-schedule.herokuapp.com/weekInstructor-api/studentWeekInstructors/" + idInstructor)
             .then(response => {
                 if (response.data != null) {
                     this.setState({
@@ -48,7 +48,7 @@ class InstructorSettle extends React.Component {
     };
 
     findWeekInstructor = (idInstructor, date) => {
-        axios.get("http://localhost:8080/weekInstructor-api/" + idInstructor + "/" + date)
+        axios.get("https://surf-school-schedule.herokuapp.com/weekInstructor-api/" + idInstructor + "/" + date)
             .then(response => {
                 if (response.data != null) {
                     this.setState({
@@ -101,7 +101,7 @@ class InstructorSettle extends React.Component {
             status: 1
         };
 
-        axios.put("http://localhost:8080/weekInstructor-api/" + weekInstructor.id, weekInstructor)
+        axios.put("https://surf-school-schedule.herokuapp.com/weekInstructor-api/" + weekInstructor.id, weekInstructor)
             .then(response => {
                 if (response.data != null) {
                     this.setState({ "showSuccesMessage": true });

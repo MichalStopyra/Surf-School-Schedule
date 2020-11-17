@@ -1,0 +1,8 @@
+/target
+/surf-school-schedule/build
+/surf-school-schedule//node_modules
+HELP.md
+mvnw
+mvnw.cmd
+SurfSchoolDataBase.trace.db
+SurfSchoolSchedule.iml

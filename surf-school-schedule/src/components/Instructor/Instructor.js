@@ -1,12 +1,12 @@
-import React from 'react';
-import { Form, Card, Col, Button } from 'react-bootstrap';
-import { faSave, faUndo, faArrowLeft, faEdit, faPlusSquare, faList } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faEdit, faPlusSquare, faSave, faUndo } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React from 'react';
+import { Button, Card, Col, Form } from 'react-bootstrap';
+import { connect } from 'react-redux';
+import { fetchInstructor, saveInstructor, updateInstructor } from '../../services/index';
 import SuccessToast from '../SuccessToast';
 
 
-import { connect } from 'react-redux';
-import { saveInstructor, fetchInstructor, updateInstructor } from '../../services/index';
 
 class Instructor extends React.Component {
 

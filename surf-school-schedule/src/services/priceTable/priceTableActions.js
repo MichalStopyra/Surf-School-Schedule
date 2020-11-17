@@ -7,7 +7,7 @@ import axios from 'axios';
 
 export const fetchAllPriceTables = (firstElement) => {
     return dispatch => {
-        axios.get("http://localhost:8080/priceTable-api/list?page=0&size=9999999&sortBy=minNrHours&sortDir=asc")
+        axios.get("https://surf-school-schedule.herokuapp.com/priceTable-api/list?page=0&size=9999999&sortBy=minNrHours&sortDir=asc")
             .then(response => {
                 if (firstElement) {
                     response.data.content.unshift(firstElement);
@@ -32,7 +32,7 @@ const fetchAllPriceTablesRequest = () => {
 
 export const savePriceTable = priceTable => {
     return dispatch => {
-        axios.post("http://localhost:8080/priceTable-api/list", priceTable)
+        axios.post("https://surf-school-schedule.herokuapp.com/priceTable-api/list", priceTable)
             .then(response => {
                 //  dispatch(priceTableSuccess(response.data));
                 dispatch(savePriceTableRequest(priceTable));
@@ -60,7 +60,7 @@ const fetchPriceTableRequest = updatedPriceTable => {
 
 export const fetchPriceTable = priceTableId => {
     return dispatch => {
-        axios.get("http://localhost:8080/priceTable-api/" + priceTableId)
+        axios.get("https://surf-school-schedule.herokuapp.com/priceTable-api/" + priceTableId)
             .then(response => {
                 dispatch(fetchPriceTableRequest(response.data));
                 //dispatch(priceTableSuccess(response.data.content));
@@ -74,7 +74,7 @@ export const fetchPriceTable = priceTableId => {
 
 export const fetchPriceTableWithNrOfLessons = fullNrOfLessons => {
     return dispatch => {
-        axios.get("http://localhost:8080/priceTable-api/fullNrOfLessons/" + fullNrOfLessons)
+        axios.get("https://surf-school-schedule.herokuapp.com/priceTable-api/fullNrOfLessons/" + fullNrOfLessons)
             .then(response => {
 
                 dispatch(fetchPriceTableRequest(response.data));
@@ -101,7 +101,7 @@ export const updatePriceTable = priceTable => {
     //console.log(priceTable);
 
     return dispatch => {
-        axios.put("http://localhost:8080/priceTable-api/" + priceTable.id, priceTable)
+        axios.put("https://surf-school-schedule.herokuapp.com/priceTable-api/" + priceTable.id, priceTable)
             .then(response => {
                 dispatch(updatePriceTableRequest(priceTable));
 
@@ -123,7 +123,7 @@ const deletePriceTableRequest = priceTableId => {
 
 export const deletePriceTable = priceTableId => {
     return dispatch => {
-        axios.delete("http://localhost:8080/priceTable-api/list/" + priceTableId)
+        axios.delete("https://surf-school-schedule.herokuapp.com/priceTable-api/list/" + priceTableId)
             .then(response => {
                 dispatch(deletePriceTableRequest(priceTableId));
                 //console.log(response);

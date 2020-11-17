@@ -49,7 +49,7 @@ class Lesson extends React.Component {
 
 
     arrayWithHours() {
-        var arr = [], i, j;
+        var arr = [], i;
         for (i = 9; i < 21; i++) {
             arr.push(i + ":00");
         }
@@ -117,7 +117,7 @@ class Lesson extends React.Component {
     //leave only free hours - when instructor does not have other lessons
     //this doesn't check if student has other lessons
     filterTimesArray = () => {
-        axios.get("http://localhost:8080/lesson-api/" + this.state.instructor.id + "/" + this.state.date)
+        axios.get("https://surf-school-schedule.herokuapp.com/lesson-api/" + this.state.instructor.id + "/" + this.state.date)
             .then(response => {
                 if (response.data != null) {
                     //save when the lessons start 
@@ -178,7 +178,7 @@ class Lesson extends React.Component {
 
 
     findLessonById = (idLesson) => {
-        axios.get("http://localhost:8080/lesson-api/" + idLesson)
+        axios.get("https://surf-school-schedule.herokuapp.com/lesson-api/" + idLesson)
             .then(response => {
                 if (response.data != null) {
                     this.props.student.students.unshift(response.data.student);
