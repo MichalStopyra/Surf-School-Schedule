@@ -3,7 +3,7 @@ This webapp enables it's user to manage surfing school from the office side
 
 https://surfschoolschedule.netlify.app/
 
-(At first open, App may need to be reloaded a couple of times to print data base elements)
+(At first open, user might have to wait a couple of seconds and reload the page to print data base elements)
 
 Functionalities:
   1. Add/Edit/Delete Students, Instructors and Price Tables.
